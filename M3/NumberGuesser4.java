@@ -108,6 +108,7 @@ public class NumberGuesser4 {
             System.out.println("Tired of playing? No problem, see you next time.");
             processed = true;
         }
+        // Date: 10/2/2023/rr268/ Created 3 difficulty conditions for the player to select
         if(message.equalsIgnoreCase("easy")){
             System.out.println("You have selected easy difficulty you will get 7 strikes to guess the number");
             this.maxStrikes = 7;
@@ -143,10 +144,12 @@ public class NumberGuesser4 {
             pickNewRandom = true;
         } else {
             System.out.println("That's wrong");
+            // Date: 10/2/2023/rr268/ Created a If-Else conidtions to tell the user if their guess is higher or lower then the actual number.
             if(guess > number)
                 System.out.println("your guess is higher");
             else
                 System.out.println("your guess is low");
+            // my code ends here
             strikes++;
             if (strikes >= maxStrikes) {
                 lose();
@@ -171,9 +174,11 @@ public class NumberGuesser4 {
         try (Scanner input = new Scanner(System.in);) {
             System.out.println("Welcome to NumberGuesser4.0");
             System.out.println("To exit, type the word 'quit'.");
+            // Date: 10/2/2023/rr268/ Add a new lines asking the user for difficulty input that would be processed in the processCommands method
             System.out.println("Please type in your difficulty (easy, medium, hard)");
             String difficulty = input.nextLine();
             processCommands(difficulty);
+            // my code ends here
             loadState();
             do {
                 if (pickNewRandom) {
