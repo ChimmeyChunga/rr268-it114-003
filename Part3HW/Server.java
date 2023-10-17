@@ -38,7 +38,7 @@ public class Server {
         }
     }
     protected synchronized void disconnect(ServerThread client) {
-		long id = client.getId();
+		long id = client.threadId();
         client.disconnect();
 		broadcast("Disconnected", id);
 	}
@@ -60,7 +60,7 @@ public class Server {
             ServerThread client = it.next();
             boolean wasSuccessful = client.send(message);
             if (!wasSuccessful) {
-                System.out.println(String.format("Removing disconnected client[%s] from list", client.getId()));
+                System.out.println(String.format("Removing disconnected client[%s] from list", client.threadId()));
                 it.remove();
                 broadcast("Disconnected", id);
             }
@@ -73,7 +73,7 @@ public class Server {
             Iterator<ServerThread> it = clients.iterator();
             while (it.hasNext()) {
                 ServerThread client = it.next();
-                if(client.getId() == clientId){
+                if(client.threadId() == clientId){
                     it.remove();
                     disconnect(client);
                     
@@ -82,6 +82,80 @@ public class Server {
             }
             return true;
         }
+        /*  rr268/ 10/16/2023 / 
+         I was able to implement this feature by going to the processCommand() method and adding an else if to check if the user enters the command "coinflip", if that command is entered it a "coinside" 
+         variable is created and then  an if statement checks a simple math.random to get either a 1 or 0 If greater then .5 then it is heads and else it would be tails. Finally takes that "coinside" with a 
+         simple string statement and passes it through to the serverthread send method that broadcasts that coinflip into the server with who it came from.
+        */
+        else if(message.equalsIgnoreCase("coinflip")){
+            Iterator<ServerThread> it = clients.iterator();
+            while (it.hasNext()){
+                ServerThread client = it.next();
+                if(client.threadId() == clientId){
+                    String coinSide = "";
+                    if(Math.random() < .5){
+                        coinSide = clientId +" got Heads!";
+                        boolean wasSuccessful = client.send(coinSide);
+                        broadcast(coinSide, clientId);
+                        if (!wasSuccessful) {
+                            System.out.println(String.format("An Erroer occured with client[%s] from list", client.threadId()));
+                            it.remove();
+                            broadcast("An erroer occured", clientId);
+                        }
+                    }
+                    else{
+                        coinSide = clientId + " got Tails!";
+                        boolean wasSuccessful = client.send(coinSide);
+                        broadcast(coinSide, clientId);
+                        if(!wasSuccessful){
+                            System.out.println(String.format("An Erroer occured with client[%s] from list", client.threadId()));
+                            it.remove();
+                            broadcast("An erroer occured", clientId);
+                        }
+                    }
+                }
+            }
+            return true;
+            // coinflip code ends here
+        }
+        /* rr268/ 10/16/2023 /
+         * Much like the first feature this feature was implemented inside of the processCommand() method as an else if statement to check if that message starts with the command "shuffle". If that command is 
+         * inputted the code then takes out the shuffle part of the command with a replace function then takes what is left into a new message variable. That new message is then put into a character list holding 
+         * all of its characters, after that a StringBuilder object is made. Then a while loop is made in which a random number variable is made by math.random and in range of the size for the character list, then 
+         * that random number is used to go a certain index inside of the character list which is appended into the stringbuilder object and also removed from the character list so no repeats of a character is made 
+         * when creating a new string. This is all done to shuffle the message and eventual make a new string that is passed through the send() method inside of the ServerThread class that broadcasts to the server 
+         * that the user shuffled their message.                
+          */
+        else if(message.startsWith("shuffle")){    // tried some regex couldnt get it working\\(^[a-z]+$)\\
+            Iterator<ServerThread> it = clients.iterator();
+            while (it.hasNext()){
+                ServerThread client = it.next();
+                if(client.threadId() == clientId){
+                    String newMessage = message.replace("shuffle ","");
+                    //System.out.println(newMessage);
+                    List<Character> charlist = new ArrayList<Character>();
+                    for(char c:newMessage.toCharArray()){
+                        charlist.add(c);
+                    }
+                    StringBuilder shuffMsg = new StringBuilder(newMessage.length());
+                    while(charlist.size()!=0){
+                        int randNum = (int)(Math.random()*charlist.size());
+                        shuffMsg.append(charlist.remove(randNum));
+                    }
+                    boolean wasSuccessful = client.send("User "+ clientId + " shuffled their message: " + shuffMsg.toString());
+                    String finalMsg = shuffMsg.toString();
+                    broadcast(finalMsg, clientId);
+                    if(!wasSuccessful){
+                        System.out.println(String.format("An Erroer occured with client[%s] from list", client.threadId()));
+                        it.remove();
+                        broadcast("An erroer occured", clientId);
+                    }
+                }
+
+            }
+            return true;
+        }
+        // shuffle command code ends here
         return false;
     }
     public static void main(String[] args) {
