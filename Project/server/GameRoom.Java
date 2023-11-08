@@ -9,7 +9,7 @@ import Project.common.Phase;
 import Project.common.TimedEvent;
 
 public class GameRoom extends Room {
-    private Phase currentPhase = Phase.READY;
+    Phase currentPhase = Phase.READY;
     private static Logger logger = Logger.getLogger(GameRoom.class.getName());
     private TimedEvent readyTimer = null;
     private ConcurrentHashMap<Long, ServerPlayer> players = new ConcurrentHashMap<Long, ServerPlayer>();
