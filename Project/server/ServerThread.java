@@ -137,7 +137,31 @@ public class ServerThread extends Thread {
         p.setMessage(message);
         return send(p);
     }
+//
+    public boolean sendScore(long clientId, int score){
+        Payload p = new Payload();
+        p.setPayloadType(PayloadType.SCORE);
+        p.setClientId(clientId);
+        p.setScore(score);
+        return send(p);
+    }
 
+    public boolean sendAnswer(long clientId, String answer){
+        Payload p = new Payload();
+        p.setPayloadType(PayloadType.ANSWER);
+        p.setClientId(clientId);
+        p.setAnswer(answer);
+        return send(p);
+    }
+
+    public boolean sendTime(long clientId, int time){
+        Payload p = new Payload();
+        p.setPayloadType(PayloadType.TIME);
+        p.setClientId(clientId);
+        p.setTime(time);
+        return send(p);
+    }
+//
     public boolean sendConnectionStatus(long clientId, String who, boolean isConnected) {
         Payload p = new Payload();
         p.setPayloadType(isConnected ? PayloadType.CONNECT : PayloadType.DISCONNECT);
@@ -228,7 +252,21 @@ public class ServerThread extends Thread {
                     logger.severe(String.format("There was a problem during readyCheck %s", e.getMessage()));
                     e.printStackTrace();
                 }
-                break; 
+                break;
+            case ANSWER:
+                ((GameRoom) currentRoom).checkAnswers(p.getAnswer(), this);
+                break;
+            case SCORE:
+                try {
+                    
+                } catch (Exception e) {
+                }
+                break;
+            case TIME:
+                try {
+                    
+                } catch (Exception e) {
+                }
             default:
                 break;
             

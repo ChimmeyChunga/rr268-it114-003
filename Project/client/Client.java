@@ -164,7 +164,13 @@ public enum Client {
             return true;
         } else if (text.equalsIgnoreCase("/ready")) {
             sendReadyStatus();
+            //
+        } else if (text.startsWith("/answer")){
+            String query = text.replace("/answer", "").trim();
+            sendAnswer(query);
+            return true;
         }
+        //
         return false;
     }
 
@@ -174,7 +180,31 @@ public enum Client {
         p.setPayloadType(PayloadType.READY);
         out.writeObject(p);
     }
+    //
+    protected void sendAnswer(String answer) throws IOException {
+        Payload p = new Payload();
+        p.setPayloadType(PayloadType.ANSWER);
+        p.setAnswer(answer);
+        p.setClientName(clientName);
+        out.writeObject(p);
+    }
 
+    protected void sendScore(int score) throws IOException {
+        Payload p = new Payload();
+        p.setPayloadType(PayloadType.SCORE);
+        p.setScore(score);
+        p.setClientName(clientName);
+        out.writeObject(p);
+    }
+
+    protected void sendTime(int time) throws IOException{
+        Payload p = new Payload();
+        p.setPayloadType(PayloadType.TIME);
+        p.setTime(time);
+        p.setClientName(clientName);
+        out.writeObject(p);
+    }
+    //
     protected void sendListRooms(String query) throws IOException {
         Payload p = new Payload();
         p.setPayloadType(PayloadType.GET_ROOMS);
@@ -268,7 +298,7 @@ public enum Client {
                     while (isRunning && !server.isClosed() && !server.isInputShutdown()
                             && (fromServer = (Payload) in.readObject()) != null) {
 
-                        logger.info("Debug Info: " + fromServer); //remember to uncomment this out later
+                        //logger.info("Debug Info: " + fromServer); //remember to uncomment this out later
                         processPayload(fromServer);
 
                     }
