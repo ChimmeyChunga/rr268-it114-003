@@ -1,4 +1,0 @@
-Category: Animals
-Question: What object does a male penguin often gift to a female penguin to win her over?
-Answers: Block of ice, Rock, Fish, Feather
-CorrectAnswer: Rock

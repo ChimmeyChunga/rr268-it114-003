@@ -1,0 +1,20 @@
+Category: Animals
+Question: What object does a male penguin often gift to a female penguin to win her over?
+Answers: Block of ice, Rock, Fish, Feather
+CorrectAnswer: Rock
+Category: Animals
+Question: What is a group of cats called?
+Answers: Murder, Pack, Clowder, Den
+CorrectAnswer: Clowder
+Category: Miscellaneous
+Question: What is the oldest soft drink in the United States?
+Answers: Coca Cola, Pepsi, Dr. Pepper, Canada Dry Ginger Ale
+CorrectAnswer: Dr. Pepper
+Category: Videogame 
+Question: What is the highest-grossing video game franchise to date?
+Answers: Mario, Pokemon, Call of Duty, Street Fighter
+CorrectAnswer: Pokemon
+Category: Marvel
+Question: Where is Captain America from?
+Answers: Queens, Manhattan, Bronx, Brooklyn"
+CorrectAnswer: Brooklyn

@@ -8,6 +8,12 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import Project.common.Constants;
 import Project.common.Phase;
@@ -105,54 +111,70 @@ public class GameRoom extends Room {
         updatePhase(Phase.SELECTION);
         // TODO example
         
-        File dir = new File("Project/server/questions");
-        File[] questions = dir.listFiles();
+        //File questions = new File("Project/server/questions/Questions");
+        //File[] questions = dir.listFiles();
         try{
-            sendMessage(null, "Welcome to Trivia Night!");
+            sendMessage(null, "Welcome to Speed Trivia Night!");
             Thread.sleep(1000);
             sendMessage(null, "Here is a quick run down on how it works.");
             Thread.sleep(1000);
-            sendMessage(null, "You all are given the same random question from a random category and have 60 seconds to select one of the four potential answers.");
+            sendMessage(null, "You all are given the same random question from a random category and have 30 seconds to select one of the four potential answers.");
             Thread.sleep(1000);
             sendMessage(null, "To answer the question do /answer 'potential answer'.");
             Thread.sleep(1000);
-            sendMessage(null, "Those who answer correctly faster then others will get more points.");
+            sendMessage(null, "Those who answer correctly faster than others will get more points.");
             Thread.sleep(1000);
-            sendMessage(null, "After 5 questions the game is over and scores are final.");
+            sendMessage(null, "After 3 questions the game is over and scores are final.");
             Thread.sleep(1000);
-            sendMessage(null, "Have fun the first question is about to popup!");
+            sendMessage(null, "Have fun, the first question is about to popup!");
             Thread.sleep(3000);
         }
         catch(InterruptedException e)
         {
             
         }
-        //for(int i = 0; i < 5; i++){
-            Trivia(questions);
-            new TimedEvent(15, () -> computeScore());
+        List<Integer> questionNum = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            questionNum.add(i);
+        }
+        Collections.shuffle(questionNum);
+        /*for (int i = 0; i < 5; i++) {
+            int test = questionNum.get(i);
+            sendMessage(null, "" + test);
+        }*/
+        for(int i = 0; i < 3; i++){
+            Trivia(questionNum.get(i));
+            new TimedEvent(30, () -> computeScore());
+            try {
+                Thread.sleep(31000);
+            } catch (Exception e) {
+                
+            }
             answerIndex = 0;
-            Trivia(questions);
-            new TimedEvent(15, () -> computeScore());
-            answerIndex = 0;
-            Trivia(questions);
-            new TimedEvent(15, () -> computeScore());
-            answerIndex = 0;
-        //}
+        }
 
     }
 
-    private void Trivia(File[] questions){
-        Random rand = new Random();
-        File question = questions[rand.nextInt(questions.length)];
+    private void Trivia(int quesNum){
+        //Random rand = new Random();
+        //File question = questions[rand.nextInt(questions.length)];
         try{
-            Scanner readQues = new Scanner(question);
-            for (int i = 0; i < 3; i++){
-                sendMessage(null, readQues.nextLine());
+            //Scanner readQues = new Scanner(questions);
+            int quesLine = (4 * quesNum);
+            List<String> allQuestions = Files.readAllLines(Paths.get("Project/server/questions/Questions.txt"));
+            for (int i = 0; i < 4; i++){
+                String ques = allQuestions.get(quesLine + i); 
+                if(i == 3){
+                    correct = ques.replace("CorrectAnswer:", "").trim();
+                }
+                else{
+                    sendMessage(null, ques);
+                }
             }
-            correct = readQues.nextLine().replace("CorrectAnswer:", "").trim();
-            readQues.close();
+            //correct = readQues.nextLine().replace("CorrectAnswer:", "").trim();
+            //readQues.close();
         }
-        catch(FileNotFoundException e)
+        catch(IOException e)
         {
 
         }

@@ -298,7 +298,7 @@ public enum Client {
                     while (isRunning && !server.isClosed() && !server.isInputShutdown()
                             && (fromServer = (Payload) in.readObject()) != null) {
 
-                        //logger.info("Debug Info: " + fromServer); //remember to uncomment this out later
+                        logger.info("Debug Info: " + fromServer); //remember to uncomment this out later
                         processPayload(fromServer);
 
                     }
