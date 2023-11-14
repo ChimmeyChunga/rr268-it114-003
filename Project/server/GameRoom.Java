@@ -142,16 +142,18 @@ public class GameRoom extends Room {
             int test = questionNum.get(i);
             sendMessage(null, "" + test);
         }*/
-        for(int i = 0; i < 3; i++){
-            Trivia(questionNum.get(i));
-            new TimedEvent(30, () -> computeScore());
-            try {
-                Thread.sleep(31000);
-            } catch (Exception e) {
-                
-            }
-            answerIndex = 0;
-        }
+        
+        Trivia(questionNum.get(0));
+        new TimedEvent(30, () -> computeScore());
+        new TimedEvent(31, () -> {answerIndex = 0;});
+        new TimedEvent(31, () -> Trivia(questionNum.get(1)));
+        new TimedEvent(61, () -> computeScore());
+        new TimedEvent(62, () -> {answerIndex = 0;});
+        new TimedEvent(62, () -> Trivia(questionNum.get(2)));
+        new TimedEvent(92, () -> computeScore());
+        new TimedEvent(93, () -> {answerIndex = 0;});
+        
+        
 
     }
 
@@ -186,7 +188,6 @@ public class GameRoom extends Room {
             sendMessage(null, "Your answer " + answer + " is correct!");
             answerOrder[answerIndex] = client;
             answerIndex++;
-            sendMessage(null, "" + answerIndex);
         }
         else{
             sendMessage(null, "Your answer is wrong, quick try again!");
