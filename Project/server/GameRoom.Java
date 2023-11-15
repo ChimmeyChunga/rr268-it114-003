@@ -148,9 +148,9 @@ public class GameRoom extends Room {
             questionNum.add(i);
         }
         Collections.shuffle(questionNum); 
-        //round(questionNum); //uncomment this 
+        round(questionNum); //uncomment this 
         // rr268, 11/13/2023
-         
+        /* 
         Trivia(questionNum.get(0));
         for (int i = 1; i < 3; i++){
             int num = questionNum.get(i);
@@ -163,7 +163,7 @@ public class GameRoom extends Room {
             }
         }    
         new TimedEvent(100, () -> resetSession());
-
+        */
     }
 
     private void round(List<Integer> questionNum){
@@ -171,12 +171,12 @@ public class GameRoom extends Room {
         scoreCheck = new TimedEvent(30, () -> computeScore());
         reset = new TimedEvent(30, () -> {answerIndex = 0;});
         question = new TimedEvent(31, () -> round(questionNum));
-        if(quesIndex >= maxQues){
-            resetSession();
+        if(quesIndex >= maxQues){     
             scoreCheck.cancel();
             reset.cancel();
             question.cancel();
             quesIndex = 0;
+            resetSession();
         }
         else
             quesIndex++;
@@ -223,8 +223,8 @@ public class GameRoom extends Room {
             sendMessage(null, "Your answer is wrong, quick try again!");
             sp.setAnswer(true);
         }
-        //long numAnswered = players.values().stream().filter(ServerPlayer::hasAnswered).count();
-        /* 
+        long numAnswered = players.values().stream().filter(ServerPlayer::hasAnswered).count();
+        
         if(numAnswered >= players.size()){
             scoreCheck.cancel();
             computeScore();
@@ -233,7 +233,7 @@ public class GameRoom extends Room {
             round(questionNum);
             players.values().stream().forEach(p -> p.setAnswer(false));
         }
-        */
+        
     }
     //rr268, 11/13/2023
     private void computeScore(){
