@@ -54,7 +54,28 @@ public class Payload implements Serializable {
     public void setMessage(String message) {
         this.message = message;
     }
+// rr268, 11/08/2023
+    private int score;
 
+    public void setScore(int score){
+        this.score = score;
+    }
+
+    public int getScore(){
+        return score;
+    }
+
+    private String answer;
+
+    public void setAnswer(String answer){
+        this.answer = answer;
+    }
+
+    public String getAnswer(){
+        return answer;
+    }
+
+//
     @Override
     public String toString() {
         return String.format("Type[%s],ClientId[%s,] ClientName[%s], Message[%s]", getPayloadType().toString(),

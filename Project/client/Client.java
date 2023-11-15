@@ -164,7 +164,13 @@ public enum Client {
             return true;
         } else if (text.equalsIgnoreCase("/ready")) {
             sendReadyStatus();
+            // rr268, 11/08/2023
+        } else if (text.startsWith("/answer")){
+            String query = text.replace("/answer", "").trim();
+            sendAnswer(query);
+            return true;
         }
+        //
         return false;
     }
 
@@ -174,7 +180,24 @@ public enum Client {
         p.setPayloadType(PayloadType.READY);
         out.writeObject(p);
     }
+    //
+    protected void sendAnswer(String answer) throws IOException {
+        Payload p = new Payload();
+        p.setPayloadType(PayloadType.ANSWER);
+        p.setAnswer(answer);
+        p.setClientName(clientName);
+        out.writeObject(p);
+    }
 
+    protected void sendScore(int score) throws IOException {
+        Payload p = new Payload();
+        p.setPayloadType(PayloadType.SCORE);
+        p.setScore(score);
+        p.setClientName(clientName);
+        out.writeObject(p);
+    }
+
+    //
     protected void sendListRooms(String query) throws IOException {
         Payload p = new Payload();
         p.setPayloadType(PayloadType.GET_ROOMS);
@@ -356,6 +379,12 @@ public enum Client {
                 break;
             case PHASE:
                 System.out.println(String.format("The current phase is %s", p.getMessage()));
+                break;
+            case ANSWER:
+                System.out.println("Your answer is correct!");
+                break;
+            case SCORE:
+                System.out.println("Your score is " + p.getScore());
                 break;
             default:
                 logger.warning(String.format("Unhandled Payload type: %s", p.getPayloadType()));

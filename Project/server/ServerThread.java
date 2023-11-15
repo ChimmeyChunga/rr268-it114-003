@@ -11,6 +11,7 @@ import Project.common.Constants;
 import Project.common.Payload;
 import Project.common.PayloadType;
 import Project.common.RoomResultPayload;
+import Project.common.Phase;
 
 /**
  * A server-side representation of a single client
@@ -78,13 +79,13 @@ public class ServerThread extends Thread {
     }
 
     // send methods
-    /*public boolean sendPhaseSync(Phase phase) {
+    public boolean sendPhaseSync(Phase phase) {
         Payload p = new Payload();
         p.setPayloadType(PayloadType.PHASE);
         p.setMessage(phase.name());
         return send(p);
     }
-*/
+
     public boolean sendReadyStatus(long clientId) {
         Payload p = new Payload();
         p.setPayloadType(PayloadType.READY);
@@ -136,7 +137,24 @@ public class ServerThread extends Thread {
         p.setMessage(message);
         return send(p);
     }
+//
+    public boolean sendScore(long clientId, int score){
+        Payload p = new Payload();
+        p.setPayloadType(PayloadType.SCORE);
+        p.setClientId(clientId);
+        p.setScore(score);
+        return send(p);
+    }
 
+    public boolean sendAnswer(long clientId, String answer){
+        Payload p = new Payload();
+        p.setPayloadType(PayloadType.ANSWER);
+        p.setClientId(clientId);
+        p.setAnswer(answer);
+        return send(p);
+    }
+
+//
     public boolean sendConnectionStatus(long clientId, String who, boolean isConnected) {
         Payload p = new Payload();
         p.setPayloadType(isConnected ? PayloadType.CONNECT : PayloadType.DISCONNECT);
@@ -220,14 +238,28 @@ public class ServerThread extends Thread {
             case JOIN_ROOM:
                 Room.joinRoom(p.getMessage().trim(), this);
                 break;
-            /*case READY:
+            case READY:
                 try {
                     ((GameRoom) currentRoom).setReady(this);
                 } catch (Exception e) {
                     logger.severe(String.format("There was a problem during readyCheck %s", e.getMessage()));
                     e.printStackTrace();
                 }
-                break; */
+                break;
+            case ANSWER:
+                ((GameRoom) currentRoom).checkAnswers(p.getAnswer(), this);
+                break;
+            case SCORE:
+                try {
+                    
+                } catch (Exception e) {
+                }
+                break;
+            case TIME:
+                try {
+                    
+                } catch (Exception e) {
+                }
             default:
                 break;
             
