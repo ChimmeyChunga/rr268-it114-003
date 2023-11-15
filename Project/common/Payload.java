@@ -54,7 +54,7 @@ public class Payload implements Serializable {
     public void setMessage(String message) {
         this.message = message;
     }
-//
+// rr268, 11/08/2023
     private int score;
 
     public void setScore(int score){
@@ -75,15 +75,6 @@ public class Payload implements Serializable {
         return answer;
     }
 
-    private int time;
-
-    public void setTime(int time){
-        this.time = time;
-    }
-
-    public int getTime(){
-        return time;
-    }
 //
     @Override
     public String toString() {

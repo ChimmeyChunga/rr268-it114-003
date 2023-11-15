@@ -1,4 +1,0 @@
-Category: Videogame 
-Question: What is the highest-grossing video game franchise to date?
-Answers: Mario, Pokemon, Call of Duty, Street Fighter
-CorrectAnswer: Pokemon

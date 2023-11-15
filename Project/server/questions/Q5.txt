@@ -1,4 +1,0 @@
-Category: Marvel
-Question: Where is Captain America from?
-Answers: Queens, Manhattan, Bronx, Brooklyn"
-CorrectAnswer: Brooklyn

@@ -3,6 +3,7 @@ package Project.common;
 public class Player {
 
     private boolean isReady = false;
+    private boolean hasAnswered = false;
 
     public void setReady(boolean isReady) {
         this.isReady = isReady;
@@ -11,16 +12,13 @@ public class Player {
     public boolean isReady() {
         return this.isReady;
     }
-
-    //
-    private int time;
-
-    public void setTime(int time){
-        this.time = time;
+//
+    public void setAnswer(boolean hasAnswered){
+        this.hasAnswered = hasAnswered;
     }
 
-    public int getTime(){
-        return time;
+    public boolean hasAnswered(){
+        return this.hasAnswered;
     }
 
     private int score;
