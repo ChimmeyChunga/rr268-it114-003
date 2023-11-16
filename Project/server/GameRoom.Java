@@ -26,12 +26,12 @@ public class GameRoom extends Room {
     private static Logger logger = Logger.getLogger(GameRoom.class.getName());
     private TimedEvent readyTimer = null;
     private TimedEvent scoreCheck = null;
-    private TimedEvent reset = null;
-    private TimedEvent question = null;
+    //private TimedEvent reset = null;
+    //private TimedEvent question = null;
     private ConcurrentHashMap<Long, ServerPlayer> players = new ConcurrentHashMap<Long, ServerPlayer>();
     private List<Integer> questionNum = new ArrayList<>();
     private String correct;
-    private ServerThread[] answerOrder;
+    private List<ServerThread> answerOrder = new ArrayList<>();
     private int answerIndex = 0;
     private int quesIndex = 0;
     private int maxQues = 3;
@@ -120,7 +120,6 @@ public class GameRoom extends Room {
         
         //File questions = new File("Project/server/questions/Questions");
         //File[] questions = dir.listFiles();
-        answerOrder = new ServerThread[players.size()];
         //long numAnswered = players.values().stream().filter(ServerPlayer::hasAnswered).count();
         try{
             sendMessage(null, "Welcome to Speed Trivia Night!");
@@ -168,13 +167,13 @@ public class GameRoom extends Room {
 
     private void round(List<Integer> questionNum){
         Trivia(questionNum.get(quesIndex));
-        scoreCheck = new TimedEvent(30, () -> computeScore());
-        reset = new TimedEvent(30, () -> {answerIndex = 0;});
-        question = new TimedEvent(31, () -> round(questionNum));
+        scoreCheck = new TimedEvent(30, () -> {
+            computeScore();
+            answerIndex = 0;
+            round(questionNum);
+        });
         if(quesIndex >= maxQues){     
             scoreCheck.cancel();
-            reset.cancel();
-            question.cancel();
             quesIndex = 0;
             resetSession();
         }
@@ -215,12 +214,12 @@ public class GameRoom extends Room {
         if (answer.equalsIgnoreCase(correct)){
             client.sendAnswer(client.getClientId(), answer);
             //sendMessage(null, "Your answer " + answer + " is correct!");
-            answerOrder[answerIndex] = client;
+            answerOrder.add(answerIndex, client); 
             sp.setAnswer(true);
             answerIndex++;
         }
         else{
-            sendMessage(null, "Your answer is wrong, quick try again!");
+            sendMessage(null, "Your answer is wrong");
             sp.setAnswer(true);
         }
         long numAnswered = players.values().stream().filter(ServerPlayer::hasAnswered).count();
@@ -228,7 +227,6 @@ public class GameRoom extends Room {
         if(numAnswered >= players.size()){
             scoreCheck.cancel();
             computeScore();
-            reset.cancel();
             answerIndex = 0;
             round(questionNum);
             players.values().stream().forEach(p -> p.setAnswer(false));
@@ -239,26 +237,26 @@ public class GameRoom extends Room {
     private void computeScore(){
         for(int i = 0; i < answerIndex; i++){
             if(i == 0){
-                ServerPlayer sp = players.get(answerOrder[i].getClientId());
+                ServerPlayer sp = players.get(answerOrder.get(i).getClientId());
                 sp.setScore(100);
             }
             else if(i == 1){
-                ServerPlayer sp = players.get(answerOrder[i].getClientId());
+                ServerPlayer sp = players.get(answerOrder.get(i).getClientId());
                 sp.setScore(75);
             }
             else if(i == 2){
-                ServerPlayer sp = players.get(answerOrder[i].getClientId());
+                ServerPlayer sp = players.get(answerOrder.get(i).getClientId());
                 sp.setScore(50);
             }
             else{
-                ServerPlayer sp = players.get(answerOrder[i].getClientId());
+                ServerPlayer sp = players.get(answerOrder.get(i).getClientId());
                 sp.setScore(25);
             }
         }
         //rr268, 11/15/2023
         Integer[] ranking = new Integer[players.size()];
         for(int i = 0; i < answerIndex; i++){
-            ServerPlayer sp = players.get(answerOrder[i].getClientId());
+            ServerPlayer sp = players.get(answerOrder.get(i).getClientId());
             sendMessage(null, sp.getClient().getClientName() + " has " + sp.getScore() + " points!");
             sp.getClient().sendScore(sp.getClient().getClientId(), sp.getScore());
             ranking[i] = sp.getScore();
@@ -268,7 +266,7 @@ public class GameRoom extends Room {
         String third = "";
         for(int i = 0; i < ranking.length; i++){
             Arrays.sort(ranking, Collections.reverseOrder());
-            ServerPlayer sp = players.get(answerOrder[i].getClientId());
+            ServerPlayer sp = players.get(answerOrder.get(i).getClientId());
             if(sp.getScore() == ranking[0]){
                 leader = sp.getClient().getClientName();
             }
