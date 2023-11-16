@@ -164,23 +164,22 @@ public class GameRoom extends Room {
         new TimedEvent(100, () -> resetSession());
         */
     }
-
+    //rr268, 11/15/2023
     private void round(List<Integer> questionNum){
-        Trivia(questionNum.get(quesIndex));
-        scoreCheck = new TimedEvent(30, () -> {
-            computeScore();
-            answerIndex = 0;
-            round(questionNum);
-        });
         if(quesIndex >= maxQues){     
             scoreCheck.cancel();
             quesIndex = 0;
             resetSession();
         }
-        else
+        else{
+            Trivia(questionNum.get(quesIndex));
+            scoreCheck = new TimedEvent(30, () -> {
+                computeScore();
+                answerIndex = 0;
+                round(questionNum);
+            });
             quesIndex++;
-        
-        
+    }    
     }
     //rr268, 11/08/2023
     private void Trivia(int quesNum){
@@ -208,7 +207,7 @@ public class GameRoom extends Room {
         }
             
     }
-
+    //rr268, 11/13/2023
     protected void checkAnswers(String answer, ServerThread client){ 
         ServerPlayer sp = players.get(client.getClientId());    
         if (answer.equalsIgnoreCase(correct)){
@@ -223,7 +222,7 @@ public class GameRoom extends Room {
             sp.setAnswer(true);
         }
         long numAnswered = players.values().stream().filter(ServerPlayer::hasAnswered).count();
-        
+        //rr268, 11/15/23
         if(numAnswered >= players.size()){
             scoreCheck.cancel();
             computeScore();
@@ -235,7 +234,7 @@ public class GameRoom extends Room {
     }
     //rr268, 11/13/2023
     private void computeScore(){
-        for(int i = 0; i < answerIndex; i++){
+        for(int i = 0; i < answerOrder.size(); i++){
             if(i == 0){
                 ServerPlayer sp = players.get(answerOrder.get(i).getClientId());
                 sp.setScore(100);
@@ -254,34 +253,34 @@ public class GameRoom extends Room {
             }
         }
         //rr268, 11/15/2023
-        Integer[] ranking = new Integer[players.size()];
-        for(int i = 0; i < answerIndex; i++){
+        List<Integer> ranking = new ArrayList<>();
+        for(int i = 0; i < answerOrder.size(); i++){
             ServerPlayer sp = players.get(answerOrder.get(i).getClientId());
             sendMessage(null, sp.getClient().getClientName() + " has " + sp.getScore() + " points!");
             sp.getClient().sendScore(sp.getClient().getClientId(), sp.getScore());
-            ranking[i] = sp.getScore();
+            ranking.add(i, sp.getScore());
         }
         String leader = "";
         String second = "";
-        String third = "";
-        for(int i = 0; i < ranking.length; i++){
-            Arrays.sort(ranking, Collections.reverseOrder());
+        //String third = "";
+        for(int i = 0; i < ranking.size(); i++){
+            Collections.sort(ranking, Collections.reverseOrder());
             ServerPlayer sp = players.get(answerOrder.get(i).getClientId());
-            if(sp.getScore() == ranking[0]){
+            if(sp.getScore() == ranking.get(0)){
                 leader = sp.getClient().getClientName();
             }
-            else if(sp.getScore() == ranking[1]){
+            else if(sp.getScore() == ranking.get(1)){
                 second = sp.getClient().getClientName();
             }
-            else if(sp.getScore() == ranking[2]){
-                third = sp.getClient().getClientName();
-            }
+            //else if(sp.getScore() == ranking.get(2)){
+                //third = sp.getClient().getClientName();
+            //}
         }
     
-        sendMessage(null, leader + " is in the lead with " + ranking[0] + " points!");
-        sendMessage(null, second + " is in in second with " + ranking[1] + " points!");
-        if(ranking[2] != null)
-            sendMessage(null, third + " is in in third with" + ranking[2] + " points!");
+        sendMessage(null, leader + " is in the lead with " + ranking.get(0) + " points!");
+        sendMessage(null, second + " is in in second with " + ranking.get(1) + " points!");
+        //if(ranking.size() >= 2)
+            //sendMessage(null, third + " is in in third with" + ranking.get(2) + " points!");
 
         players.values().stream().forEach(p -> p.setAnswer(false));
     }
