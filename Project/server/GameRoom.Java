@@ -169,6 +169,14 @@ public class GameRoom extends Room {
         if(quesIndex >= maxQues){     
             scoreCheck.cancel();
             quesIndex = 0;
+            answerIndex= 0;
+            answerOrder.clear();
+            players.values().stream().forEach(p -> p.setAnswer(false));
+            Iterator<ServerPlayer> iter = players.values().stream().iterator();
+            while (iter.hasNext()){
+                ServerPlayer client = iter.next();
+                client.setScore(0);
+            }
             resetSession();
         }
         else{
@@ -176,6 +184,9 @@ public class GameRoom extends Room {
             scoreCheck = new TimedEvent(30, () -> {
                 computeScore();
                 answerIndex = 0;
+                players.values().stream().forEach(p -> p.setAnswer(false));
+                answerOrder.clear();
+                sendMessage(null, "Time is up on to the next");
                 round(questionNum);
             });
             quesIndex++;
@@ -227,6 +238,7 @@ public class GameRoom extends Room {
             scoreCheck.cancel();
             computeScore();
             answerIndex = 0;
+            answerOrder.clear();
             round(questionNum);
             players.values().stream().forEach(p -> p.setAnswer(false));
         }
@@ -234,48 +246,65 @@ public class GameRoom extends Room {
     }
     //rr268, 11/13/2023
     private void computeScore(){
-        for(int i = 0; i < answerOrder.size(); i++){
-            if(i == 0){
-                ServerPlayer sp = players.get(answerOrder.get(i).getClientId());
-                sp.setScore(100);
-            }
-            else if(i == 1){
-                ServerPlayer sp = players.get(answerOrder.get(i).getClientId());
-                sp.setScore(75);
-            }
-            else if(i == 2){
-                ServerPlayer sp = players.get(answerOrder.get(i).getClientId());
-                sp.setScore(50);
-            }
-            else{
-                ServerPlayer sp = players.get(answerOrder.get(i).getClientId());
-                sp.setScore(25);
-            }
-        }
-        //rr268, 11/15/2023
         List<Integer> ranking = new ArrayList<>();
-        for(int i = 0; i < answerOrder.size(); i++){
-            ServerPlayer sp = players.get(answerOrder.get(i).getClientId());
-            sendMessage(null, sp.getClient().getClientName() + " has " + sp.getScore() + " points!");
-            sp.getClient().sendScore(sp.getClient().getClientId(), sp.getScore());
-            ranking.add(i, sp.getScore());
+        if(answerIndex == 0){
+            Iterator<ServerPlayer> iter = players.values().stream().iterator();
+            while (iter.hasNext()) {
+                ServerPlayer client = iter.next();
+                client.getClient().sendScore(client.getClient().getClientId(), client.getScore());
+                sendMessage(null, client.getClient().getClientName() + " has " + client.getScore() + " points!");
+                ranking.add(answerIndex, client.getScore());
+            }
         }
+        else{
+            for(int i = 0; i < answerOrder.size(); i++){
+                if(i == 0){
+                    ServerPlayer sp = players.get(answerOrder.get(i).getClientId());
+                    sp.setScore(100);
+                }
+                else if(i == 1){
+                    ServerPlayer sp = players.get(answerOrder.get(i).getClientId());
+                    sp.setScore(75);
+                }
+                else if(i == 2){
+                    ServerPlayer sp = players.get(answerOrder.get(i).getClientId());
+                    sp.setScore(50);
+                }
+                else{
+                    ServerPlayer sp = players.get(answerOrder.get(i).getClientId());
+                    sp.setScore(25);
+                }
+                //rr268, 11/15/2023
+            }    
+            Iterator<ServerPlayer> iter = players.values().stream().iterator();
+            while (iter.hasNext()) {
+                ServerPlayer client = iter.next();
+                client.getClient().sendScore(client.getClient().getClientId(), client.getScore());
+                sendMessage(null, client.getClient().getClientName() + " has " + client.getScore() + " points!");
+                ranking.add(client.getScore());
+            }
+    }
+        
         String leader = "";
         String second = "";
         //String third = "";
-        for(int i = 0; i < ranking.size(); i++){
+        //for(int i = 0; i < ranking.size(); i++){
+            Iterator<ServerPlayer> iter = players.values().stream().iterator();
             Collections.sort(ranking, Collections.reverseOrder());
-            ServerPlayer sp = players.get(answerOrder.get(i).getClientId());
-            if(sp.getScore() == ranking.get(0)){
-                leader = sp.getClient().getClientName();
-            }
-            else if(sp.getScore() == ranking.get(1)){
-                second = sp.getClient().getClientName();
+            while (iter.hasNext()){
+                //ServerPlayer sp = players.get(answerOrder.get(i).getClientId());
+                ServerPlayer sp = iter.next();
+                if(sp.getScore() == ranking.get(0)){
+                    leader = sp.getClient().getClientName();
+                }
+                else if(sp.getScore() == ranking.get(1)){
+                    second = sp.getClient().getClientName();
+                }
             }
             //else if(sp.getScore() == ranking.get(2)){
                 //third = sp.getClient().getClientName();
             //}
-        }
+            //}
     
         sendMessage(null, leader + " is in the lead with " + ranking.get(0) + " points!");
         sendMessage(null, second + " is in in second with " + ranking.get(1) + " points!");
