@@ -186,6 +186,7 @@ public class GameRoom extends Room {
                 answerIndex = 0;
                 players.values().stream().forEach(p -> p.setAnswer(false));
                 answerOrder.clear();
+                sendMessage(null, "Time is up on to the next");
                 round(questionNum);
             });
             quesIndex++;
