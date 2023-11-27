@@ -1,4 +1,4 @@
-package DCT.client;
+package Project.client;
 
 public interface IClientEvents {
     /**

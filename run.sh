@@ -9,7 +9,7 @@ then
 	java $1.server.Server $port
 elif [ "$2" = "client" ];
 then
-	java $1.client.Client
+	java $1.client.ClientUI
     # In Milestone3 changes Client to ClientUI
 elif [ "$2" = "ui" ];
 then

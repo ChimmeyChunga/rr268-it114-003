@@ -6,18 +6,17 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Scanner;
-import java.util.Map.Entry;
 import java.util.logging.Logger;
+
 
 import Project.common.Constants;
 import Project.common.Payload;
 import Project.common.PayloadType;
 import Project.common.RoomResultPayload;
 
+
 public enum Client {
-    Instance;
+    INSTANCE;
 
     Socket server = null;
     ObjectOutputStream out = null;
@@ -27,11 +26,13 @@ public enum Client {
     boolean isRunning = false;
     private Thread inputThread;
     private Thread fromServerThread;
-    private String clientName = "";
+    // private String clientName = "";
+    private ClientPlayer myPlayer = new ClientPlayer();
     private long myClientId = Constants.DEFAULT_CLIENT_ID;
     private static Logger logger = Logger.getLogger(Client.class.getName());
 
-    private Hashtable<Long, String> userList = new Hashtable<Long, String>();
+    private Hashtable<Long, ClientPlayer> userList = new Hashtable<Long, ClientPlayer>();
+
 
     private static IClientEvents events;
 
@@ -52,6 +53,8 @@ public enum Client {
      * 
      * @param address
      * @param port
+     * @param username
+     * @param callback (for triggering UI events)
      * @return true if connection was successful
      */
     public boolean connect(String address, int port, String username, IClientEvents callback) {
@@ -76,46 +79,29 @@ public enum Client {
         return isConnected();
     }
 
-
     // Send methods
+
     protected void sendReadyStatus() throws IOException {
         Payload p = new Payload();
         p.setPayloadType(PayloadType.READY);
         out.writeObject(p);
     }
-    //
-    protected void sendAnswer(String answer) throws IOException {
-        Payload p = new Payload();
-        p.setPayloadType(PayloadType.ANSWER);
-        p.setAnswer(answer);
-        p.setClientName(clientName);
-        out.writeObject(p);
-    }
 
-    protected void sendScore(int score) throws IOException {
-        Payload p = new Payload();
-        p.setPayloadType(PayloadType.SCORE);
-        p.setScore(score);
-        p.setClientName(clientName);
-        out.writeObject(p);
-    }
-
-    //
-    protected void sendListRooms(String query) throws IOException {
+    public void sendListRooms(String query) throws IOException {
         Payload p = new Payload();
         p.setPayloadType(PayloadType.GET_ROOMS);
         p.setMessage(query);
         out.writeObject(p);
     }
 
-    protected void sendJoinRoom(String roomName) throws IOException {
+    public void sendJoinRoom(String roomName) throws IOException {
         Payload p = new Payload();
         p.setPayloadType(PayloadType.JOIN_ROOM);
         p.setMessage(roomName);
         out.writeObject(p);
     }
 
-    protected void sendCreateRoom(String roomName) throws IOException {
+    public void sendCreateRoom(String roomName) throws IOException {
         Payload p = new Payload();
         p.setPayloadType(PayloadType.CREATE_ROOM);
         p.setMessage(roomName);
@@ -131,20 +117,37 @@ public enum Client {
     protected void sendConnect() throws IOException {
         Payload p = new Payload();
         p.setPayloadType(PayloadType.CONNECT);
-        p.setClientName(clientName);
+        p.setClientName(myPlayer.getClientName());
         out.writeObject(p);
     }
 
-    protected void sendMessage(String message) throws IOException {
+    public void sendMessage(String message) throws IOException {
         Payload p = new Payload();
         p.setPayloadType(PayloadType.MESSAGE);
         p.setMessage(message);
-        p.setClientName(clientName);
+        p.setClientName(myPlayer.getClientName());
+        out.writeObject(p);
+    }
+    protected void sendAnswer(String answer) throws IOException {
+        Payload p = new Payload();
+        p.setPayloadType(PayloadType.ANSWER);
+        p.setAnswer(answer);
+        p.setClientName(myPlayer.getClientName());
+        out.writeObject(p);
+    }
+    protected void sendScore(int score) throws IOException {
+        Payload p = new Payload();
+        p.setPayloadType(PayloadType.SCORE);
+        p.setScore(score);
+        p.setClientName(myPlayer.getClientName());
         out.writeObject(p);
     }
 
 
+    // end send methods
+
     private void listenForServerPayload() {
+        isRunning = true;
         fromServerThread = new Thread() {
             @Override
             public void run() {
@@ -155,7 +158,7 @@ public enum Client {
                     while (isRunning && !server.isClosed() && !server.isInputShutdown()
                             && (fromServer = (Payload) in.readObject()) != null) {
 
-                        //logger.info("Debug Info: " + fromServer); //remember to uncomment this out later
+                        logger.info("Debug Info: " + fromServer);
                         processPayload(fromServer);
 
                     }
@@ -173,7 +176,7 @@ public enum Client {
 
     protected String getClientNameById(long id) {
         if (userList.containsKey(id)) {
-            return userList.get(id);
+            return userList.get(id).getClientName();
         }
         if (id == Constants.DEFAULT_CLIENT_ID) {
             return "[Server]";
@@ -190,11 +193,15 @@ public enum Client {
         switch (p.getPayloadType()) {
             case CONNECT:
                 if (!userList.containsKey(p.getClientId())) {
-                    userList.put(p.getClientId(), p.getClientName());
+                    ClientPlayer cp = new ClientPlayer();
+                    cp.setClientName(p.getClientName());
+                    cp.setClientId(p.getClientId());
+                    userList.put(p.getClientId(), cp);
                 }
                 System.out.println(String.format("*%s %s*",
                         p.getClientName(),
                         p.getMessage()));
+                events.onClientConnect(p.getClientId(), p.getClientName(), p.getMessage());
                 break;
             case DISCONNECT:
                 if (userList.containsKey(p.getClientId())) {
@@ -206,23 +213,32 @@ public enum Client {
                 System.out.println(String.format("*%s %s*",
                         p.getClientName(),
                         p.getMessage()));
+                events.onClientDisconnect(p.getClientId(), p.getClientName(), p.getMessage());
                 break;
             case SYNC_CLIENT:
                 if (!userList.containsKey(p.getClientId())) {
-                    userList.put(p.getClientId(), p.getClientName());
+                    ClientPlayer cp = new ClientPlayer();
+                    cp.setClientName(p.getClientName());
+                    cp.setClientId(p.getClientId());
+                    userList.put(p.getClientId(), cp);
                 }
+                events.onSyncClient(p.getClientId(), p.getClientName());
                 break;
             case MESSAGE:
                 System.out.println(String.format("%s: %s",
                         getClientNameById(p.getClientId()),
                         p.getMessage()));
+                events.onMessageReceive(p.getClientId(), p.getMessage());
                 break;
             case CLIENT_ID:
                 if (myClientId == Constants.DEFAULT_CLIENT_ID) {
                     myClientId = p.getClientId();
+                    myPlayer.setClientId(myClientId);
+                    userList.put(myClientId, myPlayer);
                 } else {
                     logger.warning("Receiving client id despite already being set");
                 }
+                events.onReceiveClientId(p.getClientId());
                 break;
             case GET_ROOMS:
                 RoomResultPayload rp = (RoomResultPayload) p;
@@ -234,9 +250,11 @@ public enum Client {
                         System.out.println(String.format("%s) %s", (i + 1), rp.getRooms()[i]));
                     }
                 }
+                events.onReceiveRoomList(rp.getRooms(), rp.getMessage());
                 break;
             case RESET_USER_LIST:
                 userList.clear();
+                events.onResetUserList();
                 break;
             case READY:
                 System.out.println(String.format("Player %s is ready", getClientNameById(p.getClientId())));
@@ -253,6 +271,7 @@ public enum Client {
             default:
                 logger.warning(String.format("Unhandled Payload type: %s", p.getPayloadType()));
                 break;
+
 
         }
     }
@@ -298,6 +317,4 @@ public enum Client {
             System.out.println("Server was never opened so this exception is ok");
         }
     }
-
-
 }
