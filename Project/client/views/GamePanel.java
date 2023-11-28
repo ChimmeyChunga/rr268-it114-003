@@ -9,6 +9,7 @@ import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.JEditorPane;
 
 import Project.client.Card;
 import Project.client.Client;
@@ -18,6 +19,8 @@ import Project.common.Phase;
 
 public class GamePanel extends JPanel implements IGameEvents {
     private CardLayout cardLayout;
+    private JPanel triviaPanel = new JPanel();
+
 
     public GamePanel(ICardControls controls) {
         super(new CardLayout());
@@ -37,7 +40,6 @@ public class GamePanel extends JPanel implements IGameEvents {
             }
         });
         createReadyPanel();
-        createQuestionPanel();
         setVisible(false);
         // don't need to add this to ClientUI as this isn't a primary panel(it's nested
         // in ChatGamePanel)
@@ -59,13 +61,53 @@ public class GamePanel extends JPanel implements IGameEvents {
         readyPanel.add(readyButton);
         this.add(readyPanel);
     }
-    private void createQuestionPanel(){
-        JPanel questionPanel = new JPanel();
-        JPanel question = new JPanel();
+    private void createOptionsPanel(String options){ 
+        String[] opts = options.split(",", 4);
         JButton a1 = new JButton();
         JButton a2 = new JButton();
         JButton a3 = new JButton();
         JButton a4 = new JButton();
+        a1.setText(opts[0].trim());
+        a1.addActionListener(l ->{
+            try {
+                Client.INSTANCE.sendAnswer(a1.getText());
+            } catch (IOException e) {
+                // TODO: handle exception
+                e.printStackTrace();
+            }
+        });
+        a2.setText(opts[1].trim());
+        a2.addActionListener(l ->{
+            try {
+                Client.INSTANCE.sendAnswer(a2.getText());
+            } catch (IOException e) {
+                // TODO: handle exception
+                e.printStackTrace();
+            }
+        });
+        a3.setText(opts[2].trim());
+        a3.addActionListener(l ->{
+            try {
+                Client.INSTANCE.sendAnswer(a3.getText());
+            } catch (IOException e) {
+                // TODO: handle exception
+                e.printStackTrace();
+            }
+        });
+        a4.setText(opts[3].trim());
+        a4.addActionListener(l ->{
+            try {
+                Client.INSTANCE.sendAnswer(a4.getText());
+            } catch (IOException e) {
+                // TODO: handle exception
+                e.printStackTrace();
+            }
+        });
+        triviaPanel.add(a1);
+        triviaPanel.add(a2);
+        triviaPanel.add(a3);
+        triviaPanel.add(a4);
+        this.add(triviaPanel);
     }
 
 
@@ -101,9 +143,31 @@ public class GamePanel extends JPanel implements IGameEvents {
     public void onRoomJoin(String roomName) {
     }
 
+    @Override
     public void onReceiveAnswer(long id, String answer){
-
     }
+
+    @Override
+    public void onReceiveQuestion(String question){
+        JEditorPane ques = new JEditorPane();
+        ques.setContentType("text/plain");
+        ques.setText(question);
+        triviaPanel.add(ques);
+    }
+
+    @Override
+    public void onReceiveCategory(String category){
+        JEditorPane cat = new JEditorPane();
+        cat.setContentType("text/plain");
+        cat.setText(category);
+        triviaPanel.add(cat);
+    }
+
+    @Override
+    public void onRevieveOptions(String options){
+        createOptionsPanel(options);
+    }
+
 
     @Override
     public void onReceivePhase(Phase phase) {

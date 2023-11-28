@@ -146,6 +146,27 @@ public class ServerThread extends Thread {
         return send(p);
     }
 
+    public boolean sendQuestion(String question){
+        Payload p = new Payload();
+        p.setPayloadType(PayloadType.QUESTION);
+        p.setQuestion(question);
+        return send(p);
+    }
+
+    public boolean sendCategory(String cat){
+        Payload p = new Payload();
+        p.setPayloadType(PayloadType.CATEGORY);
+        p.setCategory(cat);
+        return send(p);
+    }
+
+    public boolean sendOptions(String options){
+        Payload p = new Payload();
+        p.setPayloadType(PayloadType.QUESTION);
+        p.setOptions(options);
+        return send(p); 
+    }
+
     public boolean sendAnswer(long clientId, String answer){
         Payload p = new Payload();
         p.setPayloadType(PayloadType.ANSWER);

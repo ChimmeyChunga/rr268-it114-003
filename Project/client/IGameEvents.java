@@ -26,4 +26,10 @@ public interface IGameEvents extends IClientEvents {
      * @param answer
      */
     void onReceiveAnswer(long id, String answer);
+
+    void onReceiveQuestion(String quesiton);
+
+    void onReceiveCategory(String category);
+
+    void onRevieveOptions(String options);
 }

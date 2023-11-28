@@ -46,10 +46,35 @@ public class GameRoom extends Room {
         players.computeIfAbsent(client.getClientId(), id -> {
             ServerPlayer player = new ServerPlayer(client);
             super.addClient(client);
+            syncGameState(client);
             logger.info(String.format("Total clients %s", clients.size()));// change visibility to protected
             return player;
         });
     }
+    
+    private void syncGameState(ServerThread incomingClient) {
+        // single data
+        // sync grid
+        incomingClient.sendPhaseSync(currentPhase);
+        Iterator<ServerPlayer> iter = players.values().stream().iterator();
+        while (iter.hasNext()) {
+            ServerPlayer client = iter.next();
+            if (client.getClient().getClientId() == incomingClient.getClientId()) {
+                continue;
+            }
+            boolean success = false;
+            if (client.isReady()) {
+                success = incomingClient.sendReadyStatus(client.getClient().getClientId());
+            }
+
+            if (!success) {
+                break;
+            }
+        }
+    }
+
+
+
 
     protected void setReady(ServerThread client) {
         logger.info("Ready check triggered");
@@ -143,7 +168,7 @@ public class GameRoom extends Room {
         }
         // rr268, 11/13/2023
         
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 7; i++) {
             questionNum.add(i);
         }
         Collections.shuffle(questionNum); 
@@ -205,6 +230,16 @@ public class GameRoom extends Room {
                 if(i == 3){
                     correct = ques.replace("CorrectAnswer:", "").trim();
                 }
+                if(i == 2){
+                    sendOptions(ques);
+                }
+                if(i == 1){
+                    sendQuestion(ques);
+                }
+                if(i == 0){
+                    sendCategory(ques);
+                }
+                // Change this to (if == 0) to send category (if == 1) to send question and (if== 2) to send answers
                 else{
                     sendMessage(null, ques);
                 }
@@ -218,6 +253,31 @@ public class GameRoom extends Room {
         }
             
     }
+    //
+    private void sendQuestion(String ques){
+        Iterator<ServerThread> iter = clients.iterator();
+        while (iter.hasNext()) {
+            ServerThread client = iter.next();
+            client.sendQuestion(ques);
+        }
+    }
+
+    private void sendCategory(String cat){
+        Iterator<ServerThread> iter = clients.iterator();
+        while (iter.hasNext()) {
+            ServerThread client = iter.next();
+            client.sendQuestion(cat);
+        }
+    }
+
+    private void sendOptions(String options){
+        Iterator<ServerThread> iter = clients.iterator();
+        while (iter.hasNext()) {
+            ServerThread client = iter.next();
+            client.sendQuestion(options);
+        }
+    }
+    
     //rr268, 11/13/2023
     protected void checkAnswers(String answer, ServerThread client){ 
         ServerPlayer sp = players.get(client.getClientId());    

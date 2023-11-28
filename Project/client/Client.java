@@ -300,6 +300,30 @@ public enum Client {
                     }
                 });
                 break;
+            case QUESTION:
+                System.out.println(p.getQuestion());
+                events.forEach(e -> {
+                    if (e instanceof IGameEvents) {
+                        ((IGameEvents) e).onReceiveQuestion(p.getQuestion());
+                    }
+                });
+                break;
+            case CATEGORY:
+                System.out.println(p.getCategory());
+                events.forEach(e -> {
+                    if (e instanceof IGameEvents) {
+                        ((IGameEvents) e).onReceiveCategory(p.getCategory());
+                    }
+                });
+                break;
+            case OPTIONS:
+                System.out.println(p.getCategory());
+                events.forEach(e -> {
+                    if (e instanceof IGameEvents) {
+                        ((IGameEvents) e).onRevieveOptions(p.getOptions());
+                    }
+                });
+                break;
             case ANSWER:
                 System.out.println("Your answer is correct!");
                 break;

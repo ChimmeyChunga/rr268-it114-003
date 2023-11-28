@@ -75,6 +75,34 @@ public class Payload implements Serializable {
         return answer;
     }
 
+    private String question;
+    private String category;
+    private String options;
+
+    public void setQuestion(String quesiton){
+        this.question = quesiton;
+    }
+
+    public void setCategory(String category){
+        this.category = category;
+    }
+
+    public void setOptions(String options){
+        this.options = options;
+    }
+
+    public String getQuestion(){
+        return question;
+    }
+
+    public String getCategory(){
+        return category;
+    }
+
+    public String getOptions(){
+        return options;
+    }
+
 //
     @Override
     public String toString() {
