@@ -5,7 +5,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.logging.Logger;
 
 
@@ -13,6 +15,7 @@ import Project.common.Constants;
 import Project.common.Payload;
 import Project.common.PayloadType;
 import Project.common.RoomResultPayload;
+import Project.common.Phase;
 
 
 public enum Client {
@@ -34,7 +37,11 @@ public enum Client {
     private Hashtable<Long, ClientPlayer> userList = new Hashtable<Long, ClientPlayer>();
 
 
-    private static IClientEvents events;
+    private static List<IClientEvents> events = new ArrayList<IClientEvents>();
+
+    public void addCallback(IClientEvents e) {
+        events.add(e);
+    }
 
     public boolean isConnected() {
         if (server == null) {
@@ -61,7 +68,7 @@ public enum Client {
         // TODO validate
         // this.clientName = username;
         myPlayer.setClientName(username);
-        Client.events = callback;
+        addCallback(callback);
         try {
             server = new Socket(address, port);
             // channel to send to server
@@ -81,7 +88,7 @@ public enum Client {
 
     // Send methods
 
-    protected void sendReadyStatus() throws IOException {
+    public void sendReadyStatus() throws IOException {
         Payload p = new Payload();
         p.setPayloadType(PayloadType.READY);
         out.writeObject(p);
@@ -128,14 +135,14 @@ public enum Client {
         p.setClientName(myPlayer.getClientName());
         out.writeObject(p);
     }
-    protected void sendAnswer(String answer) throws IOException {
+    public void sendAnswer(String answer) throws IOException {
         Payload p = new Payload();
         p.setPayloadType(PayloadType.ANSWER);
         p.setAnswer(answer);
         p.setClientName(myPlayer.getClientName());
         out.writeObject(p);
     }
-    protected void sendScore(int score) throws IOException {
+    public void sendScore(int score) throws IOException {
         Payload p = new Payload();
         p.setPayloadType(PayloadType.SCORE);
         p.setScore(score);
@@ -201,7 +208,10 @@ public enum Client {
                 System.out.println(String.format("*%s %s*",
                         p.getClientName(),
                         p.getMessage()));
-                events.onClientConnect(p.getClientId(), p.getClientName(), p.getMessage());
+                events.forEach(e -> {
+                    e.onClientConnect(p.getClientId(), p.getClientName(), p.getMessage());
+                });
+
                 break;
             case DISCONNECT:
                 if (userList.containsKey(p.getClientId())) {
@@ -213,7 +223,10 @@ public enum Client {
                 System.out.println(String.format("*%s %s*",
                         p.getClientName(),
                         p.getMessage()));
-                events.onClientDisconnect(p.getClientId(), p.getClientName(), p.getMessage());
+                events.forEach(e -> {
+                    e.onClientDisconnect(p.getClientId(), p.getClientName(), p.getMessage());
+                });
+
                 break;
             case SYNC_CLIENT:
                 if (!userList.containsKey(p.getClientId())) {
@@ -222,13 +235,19 @@ public enum Client {
                     cp.setClientId(p.getClientId());
                     userList.put(p.getClientId(), cp);
                 }
-                events.onSyncClient(p.getClientId(), p.getClientName());
+                events.forEach(e -> {
+                    e.onSyncClient(p.getClientId(), p.getClientName());
+                });
+
                 break;
             case MESSAGE:
                 System.out.println(String.format("%s: %s",
                         getClientNameById(p.getClientId()),
                         p.getMessage()));
-                events.onMessageReceive(p.getClientId(), p.getMessage());
+                events.forEach(e -> {
+                    e.onMessageReceive(p.getClientId(), p.getMessage());
+                });
+
                 break;
             case CLIENT_ID:
                 if (myClientId == Constants.DEFAULT_CLIENT_ID) {
@@ -238,7 +257,10 @@ public enum Client {
                 } else {
                     logger.warning("Receiving client id despite already being set");
                 }
-                events.onReceiveClientId(p.getClientId());
+                events.forEach(e -> {
+                    e.onReceiveClientId(p.getClientId());
+                });
+
                 break;
             case GET_ROOMS:
                 RoomResultPayload rp = (RoomResultPayload) p;
@@ -250,17 +272,33 @@ public enum Client {
                         System.out.println(String.format("%s) %s", (i + 1), rp.getRooms()[i]));
                     }
                 }
-                events.onReceiveRoomList(rp.getRooms(), rp.getMessage());
+                events.forEach(e -> {
+                    e.onReceiveRoomList(rp.getRooms(), rp.getMessage());
+                });
+
                 break;
             case RESET_USER_LIST:
                 userList.clear();
-                events.onResetUserList();
+                events.forEach(e -> {
+                    e.onResetUserList();
+                });
+
                 break;
             case READY:
                 System.out.println(String.format("Player %s is ready", getClientNameById(p.getClientId())));
+                events.forEach(e -> {
+                    if (e instanceof IGameEvents) {
+                        ((IGameEvents) e).onReceiveReady(p.getClientId());
+                    }
+                });
                 break;
             case PHASE:
                 System.out.println(String.format("The current phase is %s", p.getMessage()));
+                events.forEach(e -> {
+                    if (e instanceof IGameEvents) {
+                        ((IGameEvents) e).onReceivePhase(Enum.valueOf(Phase.class, p.getMessage()));
+                    }
+                });
                 break;
             case ANSWER:
                 System.out.println("Your answer is correct!");

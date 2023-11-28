@@ -1,5 +1,5 @@
 package Project.common;
 
 public enum Phase {
-    READY, SELECTION
+    READY, SELECTION, PREPARING, TURN
 }
