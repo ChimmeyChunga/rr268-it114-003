@@ -162,7 +162,7 @@ public class ServerThread extends Thread {
 
     public boolean sendOptions(String options){
         Payload p = new Payload();
-        p.setPayloadType(PayloadType.QUESTION);
+        p.setPayloadType(PayloadType.OPTIONS);
         p.setOptions(options);
         return send(p); 
     }

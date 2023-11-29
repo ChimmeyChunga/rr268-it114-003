@@ -212,6 +212,7 @@ public class GameRoom extends Room {
                 players.values().stream().forEach(p -> p.setAnswer(false));
                 answerOrder.clear();
                 sendMessage(null, "Time is up on to the next");
+                updatePhase(Phase.SELECTION);
                 round(questionNum);
             });
             quesIndex++;
@@ -266,7 +267,7 @@ public class GameRoom extends Room {
         Iterator<ServerThread> iter = clients.iterator();
         while (iter.hasNext()) {
             ServerThread client = iter.next();
-            client.sendQuestion(cat);
+            client.sendCategory(cat);
         }
     }
 
@@ -274,7 +275,7 @@ public class GameRoom extends Room {
         Iterator<ServerThread> iter = clients.iterator();
         while (iter.hasNext()) {
             ServerThread client = iter.next();
-            client.sendQuestion(options);
+            client.sendOptions(options);
         }
     }
     

@@ -20,7 +20,12 @@ import Project.common.Phase;
 public class GamePanel extends JPanel implements IGameEvents {
     private CardLayout cardLayout;
     private JPanel triviaPanel = new JPanel();
-
+    private JEditorPane cat = new JEditorPane();
+    private JEditorPane ques = new JEditorPane();
+    private JButton a1 = new JButton();
+    private JButton a2 = new JButton();
+    private JButton a3 = new JButton();
+    private JButton a4 = new JButton();
 
     public GamePanel(ICardControls controls) {
         super(new CardLayout());
@@ -59,55 +64,10 @@ public class GamePanel extends JPanel implements IGameEvents {
             }
         });
         readyPanel.add(readyButton);
-        this.add(readyPanel);
+        add(readyPanel);
     }
-    private void createOptionsPanel(String options){ 
-        String[] opts = options.split(",", 4);
-        JButton a1 = new JButton();
-        JButton a2 = new JButton();
-        JButton a3 = new JButton();
-        JButton a4 = new JButton();
-        a1.setText(opts[0].trim());
-        a1.addActionListener(l ->{
-            try {
-                Client.INSTANCE.sendAnswer(a1.getText());
-            } catch (IOException e) {
-                // TODO: handle exception
-                e.printStackTrace();
-            }
-        });
-        a2.setText(opts[1].trim());
-        a2.addActionListener(l ->{
-            try {
-                Client.INSTANCE.sendAnswer(a2.getText());
-            } catch (IOException e) {
-                // TODO: handle exception
-                e.printStackTrace();
-            }
-        });
-        a3.setText(opts[2].trim());
-        a3.addActionListener(l ->{
-            try {
-                Client.INSTANCE.sendAnswer(a3.getText());
-            } catch (IOException e) {
-                // TODO: handle exception
-                e.printStackTrace();
-            }
-        });
-        a4.setText(opts[3].trim());
-        a4.addActionListener(l ->{
-            try {
-                Client.INSTANCE.sendAnswer(a4.getText());
-            } catch (IOException e) {
-                // TODO: handle exception
-                e.printStackTrace();
-            }
-        });
-        triviaPanel.add(a1);
-        triviaPanel.add(a2);
-        triviaPanel.add(a3);
-        triviaPanel.add(a4);
-        this.add(triviaPanel);
+    private void createOptionsPanel(){ 
+        add(triviaPanel);
     }
 
 
@@ -149,7 +109,6 @@ public class GamePanel extends JPanel implements IGameEvents {
 
     @Override
     public void onReceiveQuestion(String question){
-        JEditorPane ques = new JEditorPane();
         ques.setContentType("text/plain");
         ques.setText(question);
         triviaPanel.add(ques);
@@ -157,15 +116,56 @@ public class GamePanel extends JPanel implements IGameEvents {
 
     @Override
     public void onReceiveCategory(String category){
-        JEditorPane cat = new JEditorPane();
         cat.setContentType("text/plain");
         cat.setText(category);
         triviaPanel.add(cat);
     }
 
     @Override
-    public void onRevieveOptions(String options){
-        createOptionsPanel(options);
+    public void onReceiveOptions(String options){
+        options = options.replace("Answer:", "");
+        String[] opts = options.split(",", 4);
+        a1.setText(opts[0].trim());
+        a1.addActionListener(l ->{
+            try {
+                Client.INSTANCE.sendAnswer(a1.getText());
+            } catch (IOException e) {
+                // TODO: handle exception
+                e.printStackTrace();
+            }
+        });
+        a2.setText(opts[1].trim());
+        a2.addActionListener(l ->{
+            try {
+                Client.INSTANCE.sendAnswer(a2.getText());
+            } catch (IOException e) {
+                // TODO: handle exception
+                e.printStackTrace();
+            }
+        });
+        a3.setText(opts[2].trim());
+        a3.addActionListener(l ->{
+            try {
+                Client.INSTANCE.sendAnswer(a3.getText());
+            } catch (IOException e) {
+                // TODO: handle exception
+                e.printStackTrace();
+            }
+        });
+        a4.setText(opts[3].trim());
+        a4.addActionListener(l ->{
+            try {
+                Client.INSTANCE.sendAnswer(a4.getText());
+            } catch (IOException e) {
+                // TODO: handle exception
+                e.printStackTrace();
+            }
+        });
+        triviaPanel.add(a1);
+        triviaPanel.add(a2);
+        triviaPanel.add(a3);
+        triviaPanel.add(a4);
+        createOptionsPanel();
     }
 
 
@@ -184,10 +184,9 @@ public class GamePanel extends JPanel implements IGameEvents {
                 cardLayout.next(this);
             }
         } else if (phase == Phase.SELECTION) {
-            cardLayout.next(this);
-        } else if (phase == Phase.PREPARING) {
-            cardLayout.next(this);
-        }
+            //System.out.println("Game has started");
+            cardLayout.next(this);      
+        } 
     }
 
     @Override

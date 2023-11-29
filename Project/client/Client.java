@@ -320,7 +320,7 @@ public enum Client {
                 System.out.println(p.getCategory());
                 events.forEach(e -> {
                     if (e instanceof IGameEvents) {
-                        ((IGameEvents) e).onRevieveOptions(p.getOptions());
+                        ((IGameEvents) e).onReceiveOptions(p.getOptions());
                     }
                 });
                 break;

@@ -31,5 +31,5 @@ public interface IGameEvents extends IClientEvents {
 
     void onReceiveCategory(String category);
 
-    void onRevieveOptions(String options);
+    void onReceiveOptions(String options);
 }
