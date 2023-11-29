@@ -79,6 +79,46 @@ public class GamePanel extends JPanel implements IGameEvents {
     }
 
     private void createOptionsPanel(){ 
+        ques.setContentType("text/plain");
+        triviaPanel.add(ques);
+        cat.setContentType("text/plain");
+        triviaPanel.add(cat);
+        a1.addActionListener(l ->{
+            try {
+                Client.INSTANCE.sendAnswer(a1.getText());
+            } catch (IOException e) {
+                // TODO: handle exception
+                e.printStackTrace();
+            }
+        });
+        triviaPanel.add(a1);
+        a2.addActionListener(l ->{
+            try {
+                Client.INSTANCE.sendAnswer(a2.getText());
+            } catch (IOException e) {
+                // TODO: handle exception
+                e.printStackTrace();
+            }
+        });
+        triviaPanel.add(a2);
+        a3.addActionListener(l ->{
+            try {
+                Client.INSTANCE.sendAnswer(a3.getText());
+            } catch (IOException e) {
+                // TODO: handle exception
+                e.printStackTrace();
+            }
+        });
+        triviaPanel.add(a3);
+        a4.addActionListener(l ->{
+            try {
+                Client.INSTANCE.sendAnswer(a4.getText());
+            } catch (IOException e) {
+                // TODO: handle exception
+                e.printStackTrace();
+            }
+        });
+        triviaPanel.add(a4);
         add(triviaPanel);
     }
 
@@ -121,16 +161,13 @@ public class GamePanel extends JPanel implements IGameEvents {
 
     @Override
     public void onReceiveQuestion(String question){
-        ques.setContentType("text/plain");
         ques.setText(question);
-        triviaPanel.add(ques);
+        
     }
 
     @Override
     public void onReceiveCategory(String category){
-        cat.setContentType("text/plain");
         cat.setText(category);
-        triviaPanel.add(cat);
     }
 
     @Override
@@ -138,46 +175,9 @@ public class GamePanel extends JPanel implements IGameEvents {
         options = options.replace("Answers:", "");
         String[] opts = options.split(",", 4);
         a1.setText(opts[0].trim());
-        a1.addActionListener(l ->{
-            try {
-                Client.INSTANCE.sendAnswer(a1.getText());
-            } catch (IOException e) {
-                // TODO: handle exception
-                e.printStackTrace();
-            }
-        });
         a2.setText(opts[1].trim());
-        a2.addActionListener(l ->{
-            try {
-                Client.INSTANCE.sendAnswer(a2.getText());
-            } catch (IOException e) {
-                // TODO: handle exception
-                e.printStackTrace();
-            }
-        });
         a3.setText(opts[2].trim());
-        a3.addActionListener(l ->{
-            try {
-                Client.INSTANCE.sendAnswer(a3.getText());
-            } catch (IOException e) {
-                // TODO: handle exception
-                e.printStackTrace();
-            }
-        });
         a4.setText(opts[3].trim());
-        a4.addActionListener(l ->{
-            try {
-                Client.INSTANCE.sendAnswer(a4.getText());
-            } catch (IOException e) {
-                // TODO: handle exception
-                e.printStackTrace();
-            }
-        });
-        triviaPanel.add(a1);
-        triviaPanel.add(a2);
-        triviaPanel.add(a3);
-        triviaPanel.add(a4);
-
     }
 
 
