@@ -1,5 +1,7 @@
 package Project.server;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
@@ -34,7 +36,7 @@ public class GameRoom extends Room {
     private List<ServerThread> answerOrder = new ArrayList<>();
     private int answerIndex = 0;
     private int quesIndex = 0;
-    private int maxQues = 3;
+    private int maxQues = 5;
     public GameRoom(String name) {
         super(name);
         // TODO Auto-generated constructor stub
@@ -140,9 +142,20 @@ public class GameRoom extends Room {
     }
 
     private void start() {
-        updatePhase(Phase.SELECTION);
         // TODO example
-        
+        updatePhase(Phase.SELECTION);
+        int lines;
+        int numQues = 0;
+        try{
+        BufferedReader reader = new BufferedReader(new FileReader("Project/server/questions/Questions.txt"));
+        lines = 0;
+        while (reader.readLine() != null) lines++;
+        reader.close();
+        numQues = lines/4;
+        }
+        catch(Exception e){
+
+        }
         //File questions = new File("Project/server/questions/Questions");
         //File[] questions = dir.listFiles();
         //long numAnswered = players.values().stream().filter(ServerPlayer::hasAnswered).count();
@@ -168,7 +181,7 @@ public class GameRoom extends Room {
         }
         // rr268, 11/13/2023
         
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < numQues; i++) {
             questionNum.add(i);
         }
         Collections.shuffle(questionNum); 
@@ -191,25 +204,49 @@ public class GameRoom extends Room {
     }
     //rr268, 11/15/2023
     private void round(List<Integer> questionNum){
+        Iterator<ServerPlayer> iter = players.values().stream().iterator();
+        int winner = 500;
+        while (iter.hasNext()) {
+            ServerPlayer p = iter.next();
+            if(p.getScore() >= winner){
+                scoreCheck.cancel();
+                quesIndex = 0;
+                answerIndex= 0;
+                answerOrder.clear();
+                sendMessage(null, "Winner is " + p.getClient().getClientName());
+                new TimedEvent(10, () -> {
+                    resetSession();
+                });
+                
+            }
+        }
         if(quesIndex >= maxQues){     
             scoreCheck.cancel();
             quesIndex = 0;
             answerIndex= 0;
             answerOrder.clear();
+            /* 
             players.values().stream().forEach(p -> p.setAnswer(false));
             Iterator<ServerPlayer> iter = players.values().stream().iterator();
             while (iter.hasNext()){
                 ServerPlayer client = iter.next();
                 client.setScore(0);
             }
-            resetSession();
+            */
+            new TimedEvent(10, () -> {
+                resetSession();
+            });
         }
         else{
             Trivia(questionNum.get(quesIndex));
+            updatePhase(Phase.GAME);
             scoreCheck = new TimedEvent(30, () -> {
                 computeScore();
                 answerIndex = 0;
-                players.values().stream().forEach(p -> p.setAnswer(false));
+                while (iter.hasNext()) {
+                    ServerPlayer c = iter.next();
+                    c.setAnswer(false);
+                }
                 answerOrder.clear();
                 sendMessage(null, "Time is up on to the next");
                 updatePhase(Phase.SELECTION);
@@ -231,13 +268,13 @@ public class GameRoom extends Room {
                 if(i == 3){
                     correct = ques.replace("CorrectAnswer:", "").trim();
                 }
-                if(i == 2){
+                else if(i == 2){
                     sendOptions(ques);
                 }
-                if(i == 1){
+                else if(i == 1){
                     sendQuestion(ques);
                 }
-                if(i == 0){
+                else if(i == 0){
                     sendCategory(ques);
                 }
                 // Change this to (if == 0) to send category (if == 1) to send question and (if== 2) to send answers
@@ -281,17 +318,22 @@ public class GameRoom extends Room {
     
     //rr268, 11/13/2023
     protected void checkAnswers(String answer, ServerThread client){ 
-        ServerPlayer sp = players.get(client.getClientId());    
-        if (answer.equalsIgnoreCase(correct)){
-            client.sendAnswer(client.getClientId(), answer);
-            //sendMessage(null, "Your answer " + answer + " is correct!");
-            answerOrder.add(answerIndex, client); 
-            sp.setAnswer(true);
-            answerIndex++;
+        ServerPlayer sp = players.get(client.getClientId());  
+        if(sp.hasAnswered() == false){
+            if (answer.equalsIgnoreCase(correct)){
+                client.sendAnswer(client.getClientId(), answer);
+                //sendMessage(null, "Your answer " + answer + " is correct!");
+                answerOrder.add(answerIndex, client); 
+                sp.setAnswer(true);
+                answerIndex++;
+            }
+            else{
+                sendMessage(null, "Your answer is wrong");
+                sp.setAnswer(true);
+            }
         }
         else{
-            sendMessage(null, "Your answer is wrong");
-            sp.setAnswer(true);
+            sendMessage(null, "You have already answered");
         }
         long numAnswered = players.values().stream().filter(ServerPlayer::hasAnswered).count();
         //rr268, 11/15/23
@@ -300,8 +342,13 @@ public class GameRoom extends Room {
             computeScore();
             answerIndex = 0;
             answerOrder.clear();
+            Iterator<ServerPlayer> iter = players.values().stream().iterator();
+            while (iter.hasNext()) {
+                ServerPlayer c = iter.next();
+                c.setAnswer(false);
+            }
             round(questionNum);
-            players.values().stream().forEach(p -> p.setAnswer(false));
+            //players.values().stream().forEach(p -> p.setAnswer(false));
         }
         
     }
@@ -376,8 +423,15 @@ public class GameRoom extends Room {
     }
 //
     private synchronized void resetSession() {
-        players.values().stream().forEach(p -> p.setReady(false));
-        players.values().stream().forEach(p -> p.setAnswer(false));
+        //players.values().stream().forEach(p -> p.setReady(false));
+        Iterator<ServerPlayer> iter = players.values().stream().iterator();
+        while (iter.hasNext()) {
+            ServerPlayer c = iter.next();
+            c.setAnswer(false);
+            c.setScore(0);
+            c.setReady(false);
+        }
+        correct = "";
         updatePhase(Phase.READY);
         sendMessage(null, "Session ended, please intiate ready check to begin a new one");
     }

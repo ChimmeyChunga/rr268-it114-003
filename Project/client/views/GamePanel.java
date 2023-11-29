@@ -45,6 +45,8 @@ public class GamePanel extends JPanel implements IGameEvents {
             }
         });
         createReadyPanel();
+        createIntroPanel();
+        createOptionsPanel();
         setVisible(false);
         // don't need to add this to ClientUI as this isn't a primary panel(it's nested
         // in ChatGamePanel)
@@ -66,6 +68,16 @@ public class GamePanel extends JPanel implements IGameEvents {
         readyPanel.add(readyButton);
         add(readyPanel);
     }
+
+    private void createIntroPanel(){
+        JPanel introPanel = new JPanel();
+        JEditorPane intro = new JEditorPane();
+        intro.setContentType("text/plain");
+        intro.setText("Welcome to Trivia Night!");
+        introPanel.add(intro);
+        add(introPanel);
+    }
+
     private void createOptionsPanel(){ 
         add(triviaPanel);
     }
@@ -123,7 +135,7 @@ public class GamePanel extends JPanel implements IGameEvents {
 
     @Override
     public void onReceiveOptions(String options){
-        options = options.replace("Answer:", "");
+        options = options.replace("Answers:", "");
         String[] opts = options.split(",", 4);
         a1.setText(opts[0].trim());
         a1.addActionListener(l ->{
@@ -165,7 +177,7 @@ public class GamePanel extends JPanel implements IGameEvents {
         triviaPanel.add(a2);
         triviaPanel.add(a3);
         triviaPanel.add(a4);
-        createOptionsPanel();
+
     }
 
 
@@ -186,7 +198,9 @@ public class GamePanel extends JPanel implements IGameEvents {
         } else if (phase == Phase.SELECTION) {
             //System.out.println("Game has started");
             cardLayout.next(this);      
-        } 
+        } else if(phase == Phase.GAME){
+            cardLayout.next(this);
+        }
     }
 
     @Override
