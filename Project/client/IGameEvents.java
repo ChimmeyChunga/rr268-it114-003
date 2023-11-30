@@ -32,4 +32,6 @@ public interface IGameEvents extends IClientEvents {
     void onReceiveCategory(String category);
 
     void onReceiveOptions(String options);
+
+    void onReceiveTime(int time);
 }

@@ -324,6 +324,14 @@ public enum Client {
                     }
                 });
                 break;
+            case TIME:
+                System.out.println(p.getTime());
+                events.forEach(e -> {
+                    if (e instanceof IGameEvents) {
+                        ((IGameEvents) e).onReceiveTime(p.getTime());
+                    }
+                });
+                break;
             case ANSWER:
                 System.out.println("Your answer is correct!");
                 break;

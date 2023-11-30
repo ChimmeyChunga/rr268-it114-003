@@ -37,6 +37,7 @@ public class GameRoom extends Room {
     private int answerIndex = 0;
     private int quesIndex = 0;
     private int maxQues = 5;
+    private boolean gameEnd = false;
     public GameRoom(String name) {
         super(name);
         // TODO Auto-generated constructor stub
@@ -142,7 +143,14 @@ public class GameRoom extends Room {
     }
 
     private void start() {
-        // TODO example
+
+        // rr268 11/29/2023
+        Iterator<ServerPlayer> iter = players.values().stream().iterator();
+        while (iter.hasNext()) {
+            ServerPlayer c = iter.next();
+            c.setAnswer(false);
+            c.setScore(0);
+        }
         updatePhase(Phase.SELECTION);
         int lines;
         int numQues = 0;
@@ -176,11 +184,9 @@ public class GameRoom extends Room {
             Thread.sleep(3000);
         }
         catch(InterruptedException e)
-        {
-            
+        {      
         }
-        // rr268, 11/13/2023
-        
+        // rr268, 11/13/2023 
         for (int i = 0; i < numQues; i++) {
             questionNum.add(i);
         }
@@ -202,10 +208,10 @@ public class GameRoom extends Room {
         new TimedEvent(100, () -> resetSession());
         */
     }
-    //rr268, 11/15/2023
+    //rr268, 11/15/2023, 11/29/2023
     private void round(List<Integer> questionNum){
         Iterator<ServerPlayer> iter = players.values().stream().iterator();
-        int winner = 500;
+        int winner = 500;    
         while (iter.hasNext()) {
             ServerPlayer p = iter.next();
             if(p.getScore() >= winner){
@@ -213,14 +219,17 @@ public class GameRoom extends Room {
                 quesIndex = 0;
                 answerIndex= 0;
                 answerOrder.clear();
+                gameEnd = true;
                 sendMessage(null, "Winner is " + p.getClient().getClientName());
+                updatePhase(Phase.END);
                 new TimedEvent(10, () -> {
                     resetSession();
                 });
-                
+                break;
             }
         }
-        if(quesIndex >= maxQues){     
+        // this is for testing purposes it will be commented out in the future
+        /*if(quesIndex >= maxQues){     
             scoreCheck.cancel();
             quesIndex = 0;
             answerIndex= 0;
@@ -232,12 +241,14 @@ public class GameRoom extends Room {
                 ServerPlayer client = iter.next();
                 client.setScore(0);
             }
-            */
+            
+            updatePhase(Phase.END);
             new TimedEvent(10, () -> {
                 resetSession();
             });
-        }
-        else{
+        }*/
+       // else{
+        if(gameEnd == false){
             Trivia(questionNum.get(quesIndex));
             updatePhase(Phase.GAME);
             scoreCheck = new TimedEvent(30, () -> {
@@ -249,11 +260,14 @@ public class GameRoom extends Room {
                 }
                 answerOrder.clear();
                 sendMessage(null, "Time is up on to the next");
-                updatePhase(Phase.SELECTION);
+                updatePhase(Phase.GAME);
                 round(questionNum);
-            });
+            })/* .setTickCallback((time) -> {
+                sendTime(time);
+            })*/;
             quesIndex++;
-    }    
+        }
+    //}    
     }
     //rr268, 11/08/2023
     private void Trivia(int quesNum){
@@ -268,6 +282,7 @@ public class GameRoom extends Room {
                 if(i == 3){
                     correct = ques.replace("CorrectAnswer:", "").trim();
                 }
+                //rr 268, 11/08/2023
                 else if(i == 2){
                     sendOptions(ques);
                 }
@@ -292,6 +307,14 @@ public class GameRoom extends Room {
             
     }
     //
+    private void sendTime(int time){
+        Iterator<ServerThread> iter = clients.iterator();
+        while (iter.hasNext()) {
+            ServerThread client = iter.next();
+            client.sendTime(time);
+        }
+    }
+
     private void sendQuestion(String ques){
         Iterator<ServerThread> iter = clients.iterator();
         while (iter.hasNext()) {

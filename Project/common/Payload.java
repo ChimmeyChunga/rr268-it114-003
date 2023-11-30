@@ -103,6 +103,16 @@ public class Payload implements Serializable {
         return options;
     }
 
+    private int time;
+
+    public void setTime(int time){
+        this.time = time;
+    }
+
+    public int getTime(){
+        return time;
+    }
+
 //
     @Override
     public String toString() {

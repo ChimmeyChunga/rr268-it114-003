@@ -26,6 +26,7 @@ public class GamePanel extends JPanel implements IGameEvents {
     private JButton a2 = new JButton();
     private JButton a3 = new JButton();
     private JButton a4 = new JButton();
+    private JEditorPane timer = new JEditorPane();
 
     public GamePanel(ICardControls controls) {
         super(new CardLayout());
@@ -47,6 +48,7 @@ public class GamePanel extends JPanel implements IGameEvents {
         createReadyPanel();
         createIntroPanel();
         createOptionsPanel();
+        createEndPanel();
         setVisible(false);
         // don't need to add this to ClientUI as this isn't a primary panel(it's nested
         // in ChatGamePanel)
@@ -76,6 +78,15 @@ public class GamePanel extends JPanel implements IGameEvents {
         intro.setText("Welcome to Trivia Night!");
         introPanel.add(intro);
         add(introPanel);
+    }
+
+    private void createEndPanel(){
+        JPanel endPanel = new JPanel();
+        JEditorPane end = new JEditorPane();
+        end.setContentType("text/plain");
+        end.setText("Thank you for playing Trivia night!");
+        endPanel.add(end);
+        add(endPanel);
     }
 
     private void createOptionsPanel(){ 
@@ -119,6 +130,8 @@ public class GamePanel extends JPanel implements IGameEvents {
             }
         });
         triviaPanel.add(a4);
+        timer.setContentType("text/plain");
+        triviaPanel.add(timer);
         add(triviaPanel);
     }
 
@@ -180,6 +193,12 @@ public class GamePanel extends JPanel implements IGameEvents {
         a4.setText(opts[3].trim());
     }
 
+    public void onReceiveTime(int time){
+        timer.setText("" + time);
+        timer.revalidate();
+        timer.repaint();
+    }
+
 
     @Override
     public void onReceivePhase(Phase phase) {
@@ -200,7 +219,10 @@ public class GamePanel extends JPanel implements IGameEvents {
             cardLayout.next(this);      
         } else if(phase == Phase.GAME){
             cardLayout.next(this);
-        }
+        } else if(phase == Phase.END){
+            cardLayout.next(this);
+        } 
+
     }
 
     @Override

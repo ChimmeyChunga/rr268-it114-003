@@ -175,6 +175,13 @@ public class ServerThread extends Thread {
         return send(p);
     }
 
+    public boolean sendTime(int time){
+        Payload p = new Payload();
+        p.setPayloadType(PayloadType.TIME);
+        p.setTime(time);
+        return send(p);
+    }
+
 //
     public boolean sendConnectionStatus(long clientId, String who, boolean isConnected) {
         Payload p = new Payload();
