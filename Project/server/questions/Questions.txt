@@ -16,5 +16,13 @@ Answers: Mario, Pokemon, Call of Duty, Street Fighter
 CorrectAnswer: Pokemon
 Category: Marvel
 Question: Where is Captain America from?
-Answers: Queens, Manhattan, Bronx, Brooklyn"
+Answers: Queens, Manhattan, Bronx, Brooklyn
 CorrectAnswer: Brooklyn
+Category: Animals
+Question: What shape are owl eyes?
+Answers: Spheres, Pyramids, Cylinders, Cubes
+CorrectAnswer: Cylinders
+Category: Animals
+Question: What animal has the strongest biting force?
+Answers: Hippo, Lion, Komodo Dragon, Crocodile
+CorrectAnswer: Crocodile
