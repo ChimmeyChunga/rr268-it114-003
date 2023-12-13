@@ -9,6 +9,7 @@ import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.JEditorPane;
 
 import Project.client.Card;
@@ -45,7 +46,7 @@ public class GamePanel extends JPanel implements IGameEvents {
                 // System.out.println("Moved to " + e.getComponent().getLocation());
             }
         });
-        createReadyPanel();
+        createReadyOrCreatePanel();
         createIntroPanel();
         createOptionsPanel();
         createEndPanel();
@@ -55,9 +56,17 @@ public class GamePanel extends JPanel implements IGameEvents {
         // controls.addPanel(Card.GAME_SCREEN.name(), this);
     }
 
-    private void createReadyPanel() {
+    private void createReadyOrCreatePanel() {
         JPanel readyPanel = new JPanel();
         JButton readyButton = new JButton();
+        JEditorPane createQuestion = new JEditorPane();
+        JTextField cat = new JTextField();
+        JTextField ques = new JTextField();
+        JTextField opts = new JTextField();
+        JTextField correctAnswer = new JTextField();
+        JButton submit = new JButton("submit question");
+        createQuestion.setContentType("text/plain");
+        createQuestion.setText("Create a Question here aswell before you ready up if you want.");
         readyButton.setText("Ready");
         readyButton.addActionListener(l -> {
             try {
@@ -68,6 +77,116 @@ public class GamePanel extends JPanel implements IGameEvents {
             }
         });
         readyPanel.add(readyButton);
+        readyPanel.add(createQuestion);
+        readyPanel.add(cat);
+        cat.addKeyListener(new KeyListener() {
+
+            @Override
+            public void keyTyped(KeyEvent e) {
+
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    submit.doClick();
+                }
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+
+            }
+
+        });
+        readyPanel.add(ques);
+        ques.addKeyListener(new KeyListener() {
+
+            @Override
+            public void keyTyped(KeyEvent e) {
+
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    submit.doClick();
+                }
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+
+            }
+
+        });
+        readyPanel.add(opts);
+        opts.addKeyListener(new KeyListener() {
+
+            @Override
+            public void keyTyped(KeyEvent e) {
+
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    submit.doClick();
+                }
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+
+            }
+
+        });
+        readyPanel.add(correctAnswer);
+        correctAnswer.addKeyListener(new KeyListener() {
+
+            @Override
+            public void keyTyped(KeyEvent e) {
+
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    submit.doClick();
+                }
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+
+            }
+
+        });
+        submit.addActionListener((event) -> {
+            try {
+                String catText = cat.getText().trim();
+                String quesText = ques.getText().trim();
+                String optsText = opts.getText().trim();
+                String correctText = correctAnswer.getText().trim();
+
+                if (catText.length() > 0) {
+                    cat.setText("");// clear the original text
+                }
+                if (quesText.length() > 0) {
+                    ques.setText("");// clear the original text
+                }
+                if (optsText.length() > 0) {
+                    opts.setText("");// clear the original text
+                }
+                if (optsText.length() > 0) {
+                    correctAnswer.setText("");// clear the original text
+                }
+            } catch (NullPointerException e) {
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+        });
+        readyPanel.add(submit);
         add(readyPanel);
     }
 
