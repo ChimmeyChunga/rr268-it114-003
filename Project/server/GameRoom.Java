@@ -359,8 +359,9 @@ public class GameRoom extends Room {
             sendMessage(null, "You have already answered");
         }
         long numAnswered = players.values().stream().filter(ServerPlayer::hasAnswered).count();
+        long numRdy = players.values().stream().filter(ServerPlayer::isReady).count();
         //rr268, 11/15/23
-        if(numAnswered >= players.size()){
+        if(numAnswered >= numRdy){
             scoreCheck.cancel();
             computeScore();
             answerIndex = 0;
@@ -410,9 +411,11 @@ public class GameRoom extends Room {
             Iterator<ServerPlayer> iter = players.values().stream().iterator();
             while (iter.hasNext()) {
                 ServerPlayer client = iter.next();
-                client.getClient().sendScore(client.getClient().getClientId(), client.getScore());
-                sendMessage(null, client.getClient().getClientName() + " has " + client.getScore() + " points!");
-                ranking.add(client.getScore());
+                if(client.isReady()){
+                    client.getClient().sendScore(client.getClient().getClientId(), client.getScore());
+                    sendMessage(null, client.getClient().getClientName() + " has " + client.getScore() + " points!");
+                    ranking.add(client.getScore());
+                }
             }
     }
         

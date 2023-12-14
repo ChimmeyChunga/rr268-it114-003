@@ -1,13 +1,19 @@
 package Project.client.views;
 
+import java.io.*;
 import java.awt.CardLayout;
 import java.awt.GridLayout;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.IOException;
 import java.util.List;
 
 import javax.swing.JButton;
+import javax.swing.BoxLayout;
+import javax.swing.JSplitPane;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JEditorPane;
@@ -60,11 +66,17 @@ public class GamePanel extends JPanel implements IGameEvents {
         JPanel readyPanel = new JPanel();
         JButton readyButton = new JButton();
         JEditorPane createQuestion = new JEditorPane();
+        // 12/13/2023 rr268
+        JLabel cate = new JLabel("Category:");
+        JLabel quest = new JLabel("Question:");
+        JLabel options = new JLabel("Options: (format it like 'option1, option2, option3')");
+        JLabel correct = new JLabel("Correct Answer:");
         JTextField cat = new JTextField();
         JTextField ques = new JTextField();
         JTextField opts = new JTextField();
         JTextField correctAnswer = new JTextField();
         JButton submit = new JButton("submit question");
+        readyPanel.setLayout(new BoxLayout(readyPanel, BoxLayout.Y_AXIS));
         createQuestion.setContentType("text/plain");
         createQuestion.setText("Create a Question here aswell before you ready up if you want.");
         readyButton.setText("Ready");
@@ -78,6 +90,7 @@ public class GamePanel extends JPanel implements IGameEvents {
         });
         readyPanel.add(readyButton);
         readyPanel.add(createQuestion);
+        readyPanel.add(cate);
         readyPanel.add(cat);
         cat.addKeyListener(new KeyListener() {
 
@@ -99,6 +112,7 @@ public class GamePanel extends JPanel implements IGameEvents {
             }
 
         });
+        readyPanel.add(quest);
         readyPanel.add(ques);
         ques.addKeyListener(new KeyListener() {
 
@@ -120,6 +134,7 @@ public class GamePanel extends JPanel implements IGameEvents {
             }
 
         });
+        readyPanel.add(options);
         readyPanel.add(opts);
         opts.addKeyListener(new KeyListener() {
 
@@ -141,6 +156,7 @@ public class GamePanel extends JPanel implements IGameEvents {
             }
 
         });
+        readyPanel.add(correct);
         readyPanel.add(correctAnswer);
         correctAnswer.addKeyListener(new KeyListener() {
 
@@ -169,6 +185,21 @@ public class GamePanel extends JPanel implements IGameEvents {
                 String optsText = opts.getText().trim();
                 String correctText = correctAnswer.getText().trim();
 
+                BufferedWriter out = new BufferedWriter(
+                    new FileWriter("Project/server/questions/Questions.txt", true)
+                );
+                
+                out.newLine();
+                out.write("Category: " + catText);
+                out.newLine();
+                out.write("Question: " + quesText);
+                out.newLine();
+                out.write("Answers: " + optsText);
+                out.newLine();
+                out.write("CorrectAnswer: " + correctText);
+
+                out.close();
+
                 if (catText.length() > 0) {
                     cat.setText("");// clear the original text
                 }
@@ -178,7 +209,7 @@ public class GamePanel extends JPanel implements IGameEvents {
                 if (optsText.length() > 0) {
                     opts.setText("");// clear the original text
                 }
-                if (optsText.length() > 0) {
+                if (correctText.length() > 0) {
                     correctAnswer.setText("");// clear the original text
                 }
             } catch (NullPointerException e) {
@@ -187,6 +218,7 @@ public class GamePanel extends JPanel implements IGameEvents {
             }
         });
         readyPanel.add(submit);
+        //
         add(readyPanel);
     }
 
@@ -209,6 +241,7 @@ public class GamePanel extends JPanel implements IGameEvents {
     }
 
     private void createOptionsPanel(){ 
+        //setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         ques.setContentType("text/plain");
         triviaPanel.add(ques);
         cat.setContentType("text/plain");
