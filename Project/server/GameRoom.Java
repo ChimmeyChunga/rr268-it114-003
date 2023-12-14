@@ -342,7 +342,7 @@ public class GameRoom extends Room {
     //rr268, 11/13/2023
     protected void checkAnswers(String answer, ServerThread client){ 
         ServerPlayer sp = players.get(client.getClientId());  
-        if(sp.hasAnswered() == false){
+        if(sp.hasAnswered() == false && sp.isAway() == false){
             if (answer.equalsIgnoreCase(correct)){
                 client.sendAnswer(client.getClientId(), answer);
                 //sendMessage(null, "Your answer " + answer + " is correct!");
@@ -355,12 +355,16 @@ public class GameRoom extends Room {
                 sp.setAnswer(true);
             }
         }
+        else if(sp.isAway() == true){
+            sendMessage(null, "You are currently away please select here to get back in the game");
+        }
         else{
             sendMessage(null, "You have already answered");
         }
         long numAnswered = players.values().stream().filter(ServerPlayer::hasAnswered).count();
-        //rr268, 11/15/23
-        if(numAnswered >= players.size()){
+        long numRdy = players.values().stream().filter(ServerPlayer::isReady).count();
+        //rr268, updated 12/13/23
+        if(numAnswered >= numRdy){
             scoreCheck.cancel();
             computeScore();
             answerIndex = 0;
@@ -410,9 +414,11 @@ public class GameRoom extends Room {
             Iterator<ServerPlayer> iter = players.values().stream().iterator();
             while (iter.hasNext()) {
                 ServerPlayer client = iter.next();
-                client.getClient().sendScore(client.getClient().getClientId(), client.getScore());
-                sendMessage(null, client.getClient().getClientName() + " has " + client.getScore() + " points!");
-                ranking.add(client.getScore());
+                if(client.isReady()){
+                    client.getClient().sendScore(client.getClient().getClientId(), client.getScore());
+                    sendMessage(null, client.getClient().getClientName() + " has " + client.getScore() + " points!");
+                    ranking.add(client.getScore());
+                }
             }
     }
         
@@ -445,6 +451,22 @@ public class GameRoom extends Room {
         players.values().stream().forEach(p -> p.setAnswer(false));
     }
 //
+    protected void setAway(ServerThread client){
+        if(players.containsKey(client.getClientId())){
+            ServerPlayer sp = players.get(client.getClientId());
+            if(sp.isAway() == false){
+                sp.setAway(true);
+                sendMessage(null, client.getClientName() + " has stepped away.");
+                sp.setReady(false);
+            }
+            else{
+                sp.setAway(false);
+                sendMessage(null, client.getClientName() + " came back!");
+                sp.setReady(true);
+            }
+        }
+    }
+
     private synchronized void resetSession() {
         //players.values().stream().forEach(p -> p.setReady(false));
         Iterator<ServerPlayer> iter = players.values().stream().iterator();

@@ -1,14 +1,21 @@
 package Project.client.views;
 
+import java.io.*;
 import java.awt.CardLayout;
 import java.awt.GridLayout;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.IOException;
 import java.util.List;
 
 import javax.swing.JButton;
+import javax.swing.BoxLayout;
+import javax.swing.JSplitPane;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.JEditorPane;
 
 import Project.client.Card;
@@ -45,7 +52,7 @@ public class GamePanel extends JPanel implements IGameEvents {
                 // System.out.println("Moved to " + e.getComponent().getLocation());
             }
         });
-        createReadyPanel();
+        createReadyOrCreatePanel();
         createIntroPanel();
         createOptionsPanel();
         createEndPanel();
@@ -55,9 +62,23 @@ public class GamePanel extends JPanel implements IGameEvents {
         // controls.addPanel(Card.GAME_SCREEN.name(), this);
     }
 
-    private void createReadyPanel() {
+    private void createReadyOrCreatePanel() {
         JPanel readyPanel = new JPanel();
         JButton readyButton = new JButton();
+        JEditorPane createQuestion = new JEditorPane();
+        // 12/13/2023 rr268
+        JLabel cate = new JLabel("Category:");
+        JLabel quest = new JLabel("Question:");
+        JLabel options = new JLabel("Options: (format it like 'option1, option2, option3')");
+        JLabel correct = new JLabel("Correct Answer:");
+        JTextField cat = new JTextField();
+        JTextField ques = new JTextField();
+        JTextField opts = new JTextField();
+        JTextField correctAnswer = new JTextField();
+        JButton submit = new JButton("submit question");
+        readyPanel.setLayout(new BoxLayout(readyPanel, BoxLayout.Y_AXIS));
+        createQuestion.setContentType("text/plain");
+        createQuestion.setText("Create a Question here aswell before you ready up if you want.");
         readyButton.setText("Ready");
         readyButton.addActionListener(l -> {
             try {
@@ -68,6 +89,137 @@ public class GamePanel extends JPanel implements IGameEvents {
             }
         });
         readyPanel.add(readyButton);
+        readyPanel.add(createQuestion);
+        readyPanel.add(cate);
+        readyPanel.add(cat);
+        cat.addKeyListener(new KeyListener() {
+
+            @Override
+            public void keyTyped(KeyEvent e) {
+
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    submit.doClick();
+                }
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+
+            }
+
+        });
+        readyPanel.add(quest);
+        readyPanel.add(ques);
+        ques.addKeyListener(new KeyListener() {
+
+            @Override
+            public void keyTyped(KeyEvent e) {
+
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    submit.doClick();
+                }
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+
+            }
+
+        });
+        readyPanel.add(options);
+        readyPanel.add(opts);
+        opts.addKeyListener(new KeyListener() {
+
+            @Override
+            public void keyTyped(KeyEvent e) {
+
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    submit.doClick();
+                }
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+
+            }
+
+        });
+        readyPanel.add(correct);
+        readyPanel.add(correctAnswer);
+        correctAnswer.addKeyListener(new KeyListener() {
+
+            @Override
+            public void keyTyped(KeyEvent e) {
+
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    submit.doClick();
+                }
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+
+            }
+
+        });
+        // 12/13/2023 rr268
+        submit.addActionListener((event) -> {
+            try {
+                String catText = cat.getText().trim();
+                String quesText = ques.getText().trim();
+                String optsText = opts.getText().trim();
+                String correctText = correctAnswer.getText().trim();
+
+                BufferedWriter out = new BufferedWriter(
+                    new FileWriter("Project/server/questions/Questions.txt", true)
+                );
+                
+                out.newLine();
+                out.write("Category: " + catText);
+                out.newLine();
+                out.write("Question: " + quesText);
+                out.newLine();
+                out.write("Answers: " + optsText);
+                out.newLine();
+                out.write("CorrectAnswer: " + correctText);
+
+                out.close();
+
+                if (catText.length() > 0) {
+                    cat.setText("");// clear the original text
+                }
+                if (quesText.length() > 0) {
+                    ques.setText("");// clear the original text
+                }
+                if (optsText.length() > 0) {
+                    opts.setText("");// clear the original text
+                }
+                if (correctText.length() > 0) {
+                    correctAnswer.setText("");// clear the original text
+                }
+            } catch (NullPointerException e) {
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+        });
+        readyPanel.add(submit);
+        //
         add(readyPanel);
     }
 
@@ -90,6 +242,9 @@ public class GamePanel extends JPanel implements IGameEvents {
     }
 
     private void createOptionsPanel(){ 
+        //setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        JButton away = new JButton("AWAY");
+        JButton here = new JButton("HERE");
         ques.setContentType("text/plain");
         triviaPanel.add(ques);
         cat.setContentType("text/plain");
@@ -132,6 +287,26 @@ public class GamePanel extends JPanel implements IGameEvents {
         triviaPanel.add(a4);
         timer.setContentType("text/plain");
         triviaPanel.add(timer);
+        // 12/13/2023 rr268
+        triviaPanel.add(away);
+        away.addActionListener(l ->{
+            try {
+                Client.INSTANCE.sendAwayStatus();
+            } catch (IOException e) {
+                // TODO: handle exception
+                e.printStackTrace();
+            }
+        });
+        triviaPanel.add(here);
+        here.addActionListener(l ->{
+            try {
+                Client.INSTANCE.sendAwayStatus();
+            } catch (IOException e) {
+                // TODO: handle exception
+                e.printStackTrace();
+            }
+        });
+        //
         add(triviaPanel);
     }
 

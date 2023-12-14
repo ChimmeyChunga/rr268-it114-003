@@ -26,3 +26,7 @@ Category: Animals
 Question: What animal has the strongest biting force?
 Answers: Hippo, Lion, Komodo Dragon, Crocodile
 CorrectAnswer: Crocodile
+Category: World History
+Question: How many U.S presidents have been assassinated?
+Answers: Four, Five, Three, Six
+CorrectAnswer: Four

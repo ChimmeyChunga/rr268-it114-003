@@ -4,6 +4,7 @@ public class Player {
 
     private boolean isReady = false;
     private boolean hasAnswered = false;
+    private boolean isAway = false;
 
     public void setReady(boolean isReady) {
         this.isReady = isReady;
@@ -30,5 +31,13 @@ public class Player {
     public int getScore(){
         return score;
     }
+    public void setAway(boolean isAway) {
+        this.isAway = isAway;
+    }
+
+    public boolean isAway() {
+        return this.isAway;
+    }
+
     //
 }
