@@ -149,6 +149,11 @@ public enum Client {
         p.setClientName(myPlayer.getClientName());
         out.writeObject(p);
     }
+    public void sendAwayStatus() throws IOException {
+        Payload p = new Payload();
+        p.setPayloadType(PayloadType.AWAY);
+        out.writeObject(p);
+    }
 
 
     // end send methods

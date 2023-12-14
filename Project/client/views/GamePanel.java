@@ -178,6 +178,7 @@ public class GamePanel extends JPanel implements IGameEvents {
             }
 
         });
+        // 12/13/2023 rr268
         submit.addActionListener((event) -> {
             try {
                 String catText = cat.getText().trim();
@@ -242,6 +243,8 @@ public class GamePanel extends JPanel implements IGameEvents {
 
     private void createOptionsPanel(){ 
         //setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        JButton away = new JButton("AWAY");
+        JButton here = new JButton("HERE");
         ques.setContentType("text/plain");
         triviaPanel.add(ques);
         cat.setContentType("text/plain");
@@ -284,6 +287,26 @@ public class GamePanel extends JPanel implements IGameEvents {
         triviaPanel.add(a4);
         timer.setContentType("text/plain");
         triviaPanel.add(timer);
+        // 12/13/2023 rr268
+        triviaPanel.add(away);
+        away.addActionListener(l ->{
+            try {
+                Client.INSTANCE.sendAwayStatus();
+            } catch (IOException e) {
+                // TODO: handle exception
+                e.printStackTrace();
+            }
+        });
+        triviaPanel.add(here);
+        here.addActionListener(l ->{
+            try {
+                Client.INSTANCE.sendAwayStatus();
+            } catch (IOException e) {
+                // TODO: handle exception
+                e.printStackTrace();
+            }
+        });
+        //
         add(triviaPanel);
     }
 

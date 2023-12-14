@@ -288,6 +288,15 @@ public class ServerThread extends Thread {
                     
                 } catch (Exception e) {
                 }
+                break;
+            case AWAY:
+                try{
+                    ((GameRoom) currentRoom).setAway(this);
+                }
+                catch (Exception e){
+
+                }
+                break;
             default:
                 break;
             
